@@ -69,8 +69,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tl-name::after{content:' ▸';font-size:10px;color:#484f58;transition:.15s}
 .tl-item.expanded .tl-name::after{content:' ▾'}
 .tl-skip{opacity:.4;text-decoration:line-through}
-.tl-ramp{opacity:.35;pointer-events:auto}
-.tl-ramp .tl-check{border-color:#21262d;pointer-events:none}
+.tl-ramp{opacity:.4}
+.tl-ramp .tl-check{border-color:#21262d}
+.tl-ramp .tl-check.checked{border-color:#238636;background:#238636;opacity:1}
+.tl-ramp.has-check{opacity:.7}
 .ramp-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;background:#1f6feb;color:#fff;margin-left:6px;vertical-align:middle}
 .ramp-badge.inactive{background:#30363d;color:#8b949e}
 .phase-card{background:#1c2128;border:1px solid #30363d;border-radius:10px;padding:12px 16px;margin-bottom:16px;text-align:center}
@@ -207,11 +209,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .gate-msg{font-size:13px;margin-top:12px;text-align:center;min-height:18px}
 .gate-msg.err{color:#f85149}
 .gate-msg.ok{color:#3fb950}
-.signout{position:fixed;top:10px;right:12px;z-index:110;background:#161b22;border:1px solid #30363d;color:#8b949e;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:inherit}
+/* Anchored above the bottom nav, not the top — the date navigator is sticky
+   at top:0 and its arrows reach the screen edges on a narrow phone. */
+.signout{position:fixed;bottom:calc(72px + env(safe-area-inset-bottom));right:12px;z-index:130;background:#161b22;border:1px solid #30363d;color:#8b949e;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:inherit}
 .signout.hidden{display:none}
 
 /* ── SYNC STATUS ── */
-.syncstat{position:fixed;top:10px;left:12px;z-index:110;font-size:11px;padding:4px 10px;border-radius:6px;max-width:calc(100% - 110px);border:1px solid transparent}
+.syncstat{position:fixed;bottom:calc(72px + env(safe-area-inset-bottom));left:12px;z-index:130;font-size:11px;padding:4px 10px;border-radius:6px;max-width:calc(100% - 110px);border:1px solid transparent}
 .syncstat.hidden{display:none}
 .syncstat.ok{background:#0d2818;color:#3fb950;border-color:#238636}
 .syncstat.busy{background:#1a2332;color:#58a6ff;border-color:#1f6feb}
@@ -1272,6 +1276,7 @@ function checkDayRollover() {
     applyRamp();
     updateAll();
     updateDateNav();
+    cloudSync();   // new day — pull it from the cloud, not just localStorage
   }
 }
 // Check every 30 seconds + on tab focus
@@ -1480,16 +1485,25 @@ function getSuppCompletion() {
   document.querySelectorAll('#tab-supps .tl-item').forEach(item => {
     const d = item.dataset.day;
     if (d === 'both' || d === currentDay) {
-      total++;
-      if (item.querySelector('.tl-check.checked')) checked++;
+      const isRamped = item.classList.contains('tl-ramp');
+      const isChecked = !!item.querySelector('.tl-check.checked');
+      // Ramped items don't count toward required total, but checked ones count as bonus
+      if (!isRamped) total++;
+      if (isChecked) checked++;
+      // Visual feedback: brighten ramped items that are checked
+      item.classList.toggle('has-check', isRamped && isChecked);
     }
   });
   return { total, checked, pct: total > 0 ? Math.round(checked / total * 100) : 0 };
 }
 function getExCompletion() {
-  const checks = document.querySelectorAll('#tab-exercise .tl-check');
-  let total = checks.length, checked = 0;
-  checks.forEach(el => { if (el.classList.contains('checked')) checked++; });
+  let total = 0, checked = 0;
+  document.querySelectorAll('#tab-exercise .tl-item').forEach(item => {
+    const isRamped = item.classList.contains('tl-ramp');
+    const isChecked = !!item.querySelector('.tl-check.checked');
+    if (!isRamped) total++;
+    if (isChecked) checked++;
+  });
   return { total, checked, pct: total > 0 ? Math.round(checked / total * 100) : 0 };
 }
 function getPlanCompletion() {
@@ -1505,11 +1519,16 @@ function updateDial(arcId, pctId, countId, data, color) {
   const pctEl = document.getElementById(pctId);
   const countEl = document.getElementById(countId);
   if (!arc) return;
-  const circ = 172.8; // semicircle circumference for r=55
-  const offset = circ * (1 - data.pct / 100);
+  const circ = 172.8;
+  // Cap visual arc at 100% but show actual percentage in text
+  const visualPct = Math.min(data.pct, 100);
+  const offset = circ * (1 - visualPct / 100);
   arc.style.strokeDashoffset = offset;
   pctEl.textContent = data.pct + '%';
   countEl.textContent = data.checked + '/' + data.total;
+  // Glow effect for >100%
+  if (data.pct > 100) arc.style.filter = 'drop-shadow(0 0 4px #3fb950)';
+  else arc.style.filter = '';
 }
 
 // ── STREAK ──
@@ -1549,14 +1568,16 @@ function updateAll() {
   const pillEl = document.getElementById('sum-pills');
   if (dayEl) dayEl.textContent = currentDay === 'training' ? 'Training' : 'Rest / Z2';
   if (pillEl) pillEl.textContent = currentDay === 'training' ? '34 (loading) / 33 (maint.)' : '25';
-  // Protocol day
+  // Protocol day — relative to viewed date
   const pdEl = document.getElementById('sum-protday');
   if (pdEl) {
     const start = new Date(PROTO_START + 'T00:00:00');
-    const now = new Date(today + 'T00:00:00');
-    const diff = Math.floor((now - start) / 86400000) + 1;
+    const vd = new Date(viewingDate + 'T00:00:00');
+    const diff = Math.floor((vd - start) / 86400000) + 1;
     pdEl.textContent = diff > 0 ? 'Day ' + diff + ' of 90' : 'Starting soon';
   }
+  // Progress bar cap at 100% width, text can exceed
+  if (progFill) progFill.style.width = Math.min(sc.pct, 100) + '%';
   renderStreak();
   renderCal();
   updateAverages();
@@ -1687,8 +1708,13 @@ function updateAverages() {
 }
 
 // ── RAMP LOGIC ──
+function getWeekForDate(dateStr) {
+  const start = new Date(PROTO_START + 'T00:00:00');
+  const d = new Date(dateStr + 'T00:00:00');
+  return Math.max(1, Math.ceil((d - start + 86400000) / 604800000));
+}
 function applyRamp() {
-  const w = protoWeek;
+  const w = getWeekForDate(viewingDate);
   // Phase card
   const pw = document.getElementById('phase-week');
   const pl = document.getElementById('phase-label');
@@ -1740,7 +1766,7 @@ function applyRamp() {
 }
 
 function updateDynamicTotals() {
-  const w = protoWeek;
+  const w = getWeekForDate(viewingDate);
   let lunch = 10; // Tongkat 2 + Boron 2 + K2 2 + ALA 1 + Omega 2 + base berberine 1
   lunch += (w <= 12 ? 2 : 1); // D3 loading vs maintenance
   if (w >= 2) lunch += 2; // butyrate lunch
