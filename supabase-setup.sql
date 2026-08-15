@@ -16,3 +16,8 @@ create policy "Allow anon full access"
   for all
   using (true)
   with check (true);
+
+-- 4. Grant table privileges to the anon role.
+--    RLS policies only filter rows — without this GRANT every request
+--    fails with 42501 "permission denied for table protocol_kv".
+grant select, insert, update, delete on public.protocol_kv to anon;
