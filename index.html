@@ -184,6 +184,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .lh-supp-snap strong{color:#f0f6fc}
 .lh-note{font-size:11px;color:#484f58;margin-top:4px;font-style:italic}
 
+/* ── Date Navigator ── */
+.date-nav{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;background:#161b22;border-bottom:1px solid #21262d;position:sticky;top:0;z-index:90}
+.date-nav-btn{width:36px;height:36px;border-radius:50%;border:1px solid #30363d;background:#0d1117;color:#8b949e;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.date-nav-btn:active{background:#1f6feb;color:#fff;border-color:#1f6feb}
+.date-nav-btn.disabled{opacity:.25;pointer-events:none}
+.date-nav-label{font-size:14px;font-weight:700;color:#f0f6fc;min-width:160px;text-align:center;cursor:pointer}
+.date-nav-label .date-sub{font-size:11px;font-weight:400;color:#8b949e;display:block}
+.date-nav-badge{display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#da3633;color:#fff;margin-left:4px}
+.date-nav-badge.show{display:inline-block}
+
 /* ── LOGIN GATE ── */
 .gate{position:fixed;inset:0;background:#0d1117;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
 .gate.hidden{display:none}
@@ -219,6 +229,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <button class="signout hidden" id="signout" onclick="signOut()">Sign out</button>
 
 <div class="app">
+
+<!-- Date Navigator -->
+<div class="date-nav" id="date-nav">
+<button class="date-nav-btn" id="date-prev" onclick="navDate(-1)">‹</button>
+<div class="date-nav-label" id="date-nav-label" onclick="navToToday()">
+  <span id="date-nav-main">Today</span>
+  <span class="date-sub" id="date-nav-sub"></span>
+</div>
+<button class="date-nav-btn" id="date-next" onclick="navDate(1)">›</button>
+<span class="date-nav-badge" id="date-nav-badge">PAST</span>
+</div>
 
 <!-- ══════════════════════════════════════════ -->
 <!-- TAB 0: SUMMARY -->
@@ -1209,25 +1230,82 @@ let protoWeek = getProtoWeek();
 function checkDayRollover() {
   const now = getToday();
   if (now !== today) {
-    // Save final state for the old day before switching
     saveState();
-    // Update to new day
     today = now;
+    viewingDate = today;
     SK = 'protocol-' + today;
     protoWeek = getProtoWeek();
-    // Uncheck all supplement & exercise boxes for the fresh day
     document.querySelectorAll('#tab-supps .tl-check, #tab-exercise .tl-check').forEach(el => el.classList.remove('checked'));
-    // Reset day toggle to training (default for new day)
     currentDay = 'training';
-    // Load any existing state for the new day (in case they already checked items today)
     loadState();
     applyRamp();
     updateAll();
+    updateDateNav();
   }
 }
 // Check every 30 seconds + on tab focus
 setInterval(checkDayRollover, 30000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) checkDayRollover(); });
+
+/* ── Date Navigation (edit past days) ── */
+let viewingDate = today;  // the date currently shown in the UI
+
+function formatDateLabel(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function updateDateNav() {
+  const mainEl = document.getElementById('date-nav-main');
+  const subEl = document.getElementById('date-nav-sub');
+  const badge = document.getElementById('date-nav-badge');
+  const nextBtn = document.getElementById('date-next');
+  const isToday = viewingDate === getToday();
+  mainEl.textContent = isToday ? 'Today' : formatDateLabel(viewingDate);
+  subEl.textContent = isToday ? formatDateLabel(viewingDate) : 'Tap to return to today';
+  badge.classList.toggle('show', !isToday);
+  nextBtn.classList.toggle('disabled', isToday);
+}
+
+function switchToDate(dateStr) {
+  // Save current state before switching
+  saveState();
+  // Clear all checkboxes
+  document.querySelectorAll('#tab-supps .tl-check, #tab-exercise .tl-check').forEach(el => el.classList.remove('checked'));
+  document.querySelectorAll('#tab-plan .tl-check').forEach(el => { el.classList.remove('checked'); el.closest('.plan-row')?.classList.remove('done'); });
+  // Switch to new date
+  viewingDate = dateStr;
+  SK = 'protocol-' + viewingDate;
+  currentDay = 'training';
+  // Load state for that date
+  loadState();
+  applyRamp();
+  updateAll();
+  updateDateNav();
+  // Update summary date display
+  const dateEl = document.getElementById('summary-date');
+  if (dateEl) {
+    const d = new Date(viewingDate + 'T12:00:00');
+    dateEl.textContent = d.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
+  }
+  cloudSync();   // pull that day from the cloud — localStorage alone is device-local
+}
+
+function navDate(delta) {
+  const d = new Date(viewingDate + 'T12:00:00');
+  d.setDate(d.getDate() + delta);
+  const newDate = d.toISOString().slice(0, 10);
+  // Don't go into the future
+  if (newDate > getToday()) return;
+  switchToDate(newDate);
+}
+
+function navToToday() {
+  if (viewingDate !== getToday()) {
+    today = getToday();
+    switchToDate(today);
+  }
+}
 
 /* ── Lab History toggle ── */
 function showLabPanel(panel) {
@@ -1719,6 +1797,7 @@ document.getElementById('gate-form').addEventListener('submit', async (e) => {
     const d = new Date(today + 'T12:00:00');
     dateEl.textContent = d.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
   }
+  updateDateNav();
   loadState();     // instant from localStorage
   applyRamp();
   updateAll();
