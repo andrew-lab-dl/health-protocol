@@ -635,16 +635,16 @@ Will reflect full protocol impact: berberine 1500mg/day, psyllium 5g/day, omega-
 
 <div class="tl-block">
 <div class="tl-time">AM — Strength / Conditioning</div>
-<div class="tl-item" data-exw="25"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Alpha Strength</div><div class="tl-detail">Upper Push / Upper Pull / Full Body — per schedule</div></div></div>
-<div class="tl-item" data-exw="20"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Alpha Conditioning / HIIT</div><div class="tl-detail">Circuit day or conditioning finisher</div></div></div>
-<div class="tl-item" data-exw="20"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Heavy Legs</div><div class="tl-detail">Squat / deadlift / leg press focus (Thursday)</div></div></div>
+<div class="tl-item" data-exw="25" data-exrole="core"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Alpha Strength</div><div class="tl-detail">Upper Push / Upper Pull / Full Body — per schedule</div></div></div>
+<div class="tl-item" data-exw="20" data-exrole="core"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Alpha Conditioning / HIIT</div><div class="tl-detail">Circuit day or conditioning finisher</div></div></div>
+<div class="tl-item" data-exw="20" data-exrole="core"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Heavy Legs</div><div class="tl-detail">Squat / deadlift / leg press focus (Thursday)</div></div></div>
 <div class="tl-item" data-exw="5"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Post-Workout Interval Walk/Jog — 20 min</div><div class="tl-detail">Zone 2–3, incline treadmill</div></div></div>
 </div>
 
 <div class="tl-block">
 <div class="tl-time">PM — BJJ / Evening Activity</div>
-<div class="tl-item" data-exw="20"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">BJJ Class</div><div class="tl-detail">Evening session — skip if shoulder/recovery needs it</div></div></div>
-<div class="tl-item" data-exw="15"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">BJJ Open Mat (Saturday)</div><div class="tl-detail">Count as training day for supplements</div></div></div>
+<div class="tl-item" data-exw="20" data-exrole="core"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">BJJ Class</div><div class="tl-detail">Evening session — skip if shoulder/recovery needs it</div></div></div>
+<div class="tl-item" data-exw="15" data-exrole="core"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">BJJ Open Mat (Saturday)</div><div class="tl-detail">Count as training day for supplements</div></div></div>
 </div>
 
 <div class="tl-block">
@@ -1502,20 +1502,45 @@ function getSuppCompletion() {
   return { total, checked, pct: total > 0 ? Math.round(checked / total * 100) : 0 };
 }
 function getExCompletion() {
-  // Weighted: main workouts = 20-25pts, incremental = 5-10pts
-  // Weights: Alpha 25, Conditioning 20, Heavy Legs 20, BJJ 20, BJJ Open 15,
-  //          Zone 2 10, Post-workout walk 5, Dinner walk 5, Tendon rehab 5
-  let totalWeight = 0, checkedWeight = 0, checked = 0, total = 0;
+  // Core workouts (data-exrole="core") are ALTERNATIVES — you do one on a given
+  // day — so summing all five into the denominator made a single session read
+  // ~20%. Instead: showing up at all is worth SHOW_UP, plus the weight of your
+  // best session that day. Extra sessions and incrementals stack on top, so
+  // going past 100% stays reachable.
+  //   Alpha alone .............. 45+25 / 95 = 74%
+  //   Open Mat alone ........... 45+15 / 95 = 63%   (weights still rank)
+  //   Alpha + all incrementals . 45+25+25 / 95 = 100%
+  //   Alpha + BJJ + all incr ... 45+25+20+25 / 95 = 121%
+  const SHOW_UP = 45;
+  const coreWeights = [], checkedCore = [];
+  let incrTotal = 0, incrChecked = 0, checked = 0, total = 0;
   document.querySelectorAll('#tab-exercise .tl-item').forEach(item => {
     const isRamped = item.classList.contains('tl-ramp');
     const isChecked = !!item.querySelector('.tl-check.checked');
     const w = parseInt(item.dataset.exw) || 10;
-    if (!isRamped) { totalWeight += w; total++; }
-    if (isChecked) { checkedWeight += w; checked++; }
+    const isCore = item.dataset.exrole === 'core';
+    if (!isRamped) {
+      total++;
+      if (isCore) coreWeights.push(w); else incrTotal += w;
+    }
+    if (isChecked) {
+      checked++;
+      if (isCore) checkedCore.push(w); else incrChecked += w;
+    }
     if (isRamped && isChecked) item.classList.add('has-check');
     else if (isRamped) item.classList.remove('has-check');
   });
-  return { total, checked, pct: totalWeight > 0 ? Math.round(checkedWeight / totalWeight * 100) : 0 };
+
+  const maxCore = coreWeights.length ? Math.max.apply(null, coreWeights) : 0;
+  const totalWeight = SHOW_UP + maxCore + incrTotal;
+
+  let earned = incrChecked;
+  if (checkedCore.length) {
+    checkedCore.sort((a, b) => b - a);
+    earned += SHOW_UP + checkedCore[0];                       // showed up + best session
+    for (let i = 1; i < checkedCore.length; i++) earned += checkedCore[i];  // extras are bonus
+  }
+  return { total, checked, pct: totalWeight > 0 ? Math.round(earned / totalWeight * 100) : 0 };
 }
 function getPlanCompletion() {
   const checks = document.querySelectorAll('#tab-plan .tl-check');

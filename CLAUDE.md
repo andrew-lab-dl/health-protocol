@@ -20,11 +20,26 @@ New versions are authored in iCloud at
 - `user_id` on every cloud row in `cloudSave` / `cloudLoad`
 - `.maybeSingle()` instead of `.single()` in `cloudLoad`
 - the sync-status badge and `syncErr()` error surfacing
-- the `cloudSync()` call at the end of `switchToDate`
+- the `cloudSync()` calls in `switchToDate` and `checkDayRollover`
+- `data-exrole="core"` on the five core workouts, and the show-up weighting in
+  `getExCompletion` (see below)
 
 Never straight-copy. Diff the new version against the deployed `index.html`,
 port Andrew's actual changes forward, and keep everything above intact. Then
 `node --check` the extracted `<script>` block before pushing.
+
+## Exercise scoring
+
+The five core workouts (`data-exrole="core"`: Alpha Strength, Conditioning,
+Heavy Legs, BJJ, BJJ Open Mat) are **alternatives** — Andrew does one on a given
+day. Summing all five into the denominator made a single session read ~20%, so
+`getExCompletion` scores `SHOW_UP (45) + best checked core weight + incrementals`
+over `SHOW_UP + max core weight + all incrementals`. Additional core sessions
+stack on top as bonus, keeping >100% reachable.
+
+Andrew's intent is that **doing at least one workout dominates the bar** — one
+session lands at 63–74%. Preserve that property if the weights change. Note the
+exercise items have no `data-day`, so every item counts every day.
 
 ## Supabase
 
