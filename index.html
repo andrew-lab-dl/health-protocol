@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Andrew Li — Complete Protocol</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#e6edf3;line-height:1.55;overflow-x:hidden}
+.app{max-width:800px;margin:0 auto;padding-bottom:70px}
+
+/* ── NAV ── */
+.nav{position:fixed;bottom:0;left:0;right:0;background:#161b22;border-top:1px solid #30363d;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{flex:1;padding:8px 4px 6px;text-align:center;font-size:10px;color:#8b949e;background:none;border:none;cursor:pointer;transition:.2s}
+.nav-btn.active{color:#58a6ff}
+.nav-btn svg{display:block;margin:0 auto 3px;width:22px;height:22px}
+.nav-btn.active svg{filter:drop-shadow(0 0 4px rgba(88,166,255,.4))}
+
+/* ── TABS ── */
+.tab{display:none;padding:16px}
+.tab.active{display:block}
+.tab-title{font-size:20px;font-weight:800;margin-bottom:4px}
+.tab-sub{font-size:13px;color:#8b949e;margin-bottom:20px}
+
+/* ── CARDS ── */
+.card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px}
+.card-t{font-weight:700;font-size:14px;color:#f0f6fc}
+.card-v{font-size:12px;font-weight:600;padding:2px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0}
+.vr{background:#3d1214;color:#f85149}.vy{background:#3d2e00;color:#e3b341}.vg{background:#0d2818;color:#3fb950}.vb{background:#1a2332;color:#58a6ff}
+.card-b{font-size:13px;color:#b1bac4}
+.action{margin-top:8px;padding:8px 12px;background:#1c2128;border-left:3px solid #58a6ff;border-radius:4px;font-size:13px;color:#c9d1d9}
+.action strong{color:#58a6ff}
+
+/* ── BADGES ── */
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.br{background:#da3633;color:#fff}.by{background:#d29922;color:#fff}.bg{background:#238636;color:#fff}.bb{background:#1f6feb;color:#fff}
+
+/* ── SECTION ── */
+.sec{margin-bottom:24px}
+.sec-h{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #21262d}
+.sec-h h2{font-size:15px;font-weight:700}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:600px){.g2{grid-template-columns:1fr}}
+
+/* ── TOGGLE ── */
+.toggle-row{display:flex;gap:6px;margin-bottom:16px;background:#161b22;border-radius:8px;padding:4px;border:1px solid #30363d}
+.toggle-btn{flex:1;padding:8px;text-align:center;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:#8b949e;transition:.2s}
+.toggle-btn.active{background:#238636;color:#fff}
+
+/* ── TIMELINE ── */
+.tl-block{margin-bottom:16px}
+.tl-time{font-size:13px;font-weight:700;color:#58a6ff;padding:6px 12px;background:#1a2332;border-radius:6px;display:inline-block;margin-bottom:8px}
+.tl-item{display:flex;align-items:flex-start;padding:8px 0;border-bottom:1px solid #21262d;gap:10px}
+.tl-item:last-child{border-bottom:none}
+.tl-check{width:20px;height:20px;border:2px solid #30363d;border-radius:4px;cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.tl-check.checked{background:#238636;border-color:#238636}
+.tl-check.checked::after{content:'✓';color:#fff;font-size:12px;font-weight:700}
+.tl-info{flex:1}
+.tl-name{font-size:13px;font-weight:600;color:#f0f6fc}
+.tl-detail{font-size:11px;color:#8b949e;margin-top:2px}
+.tl-why{font-size:11px;color:#7c6dd8;font-style:italic;margin-top:4px;display:none;padding:6px 0 2px;border-top:1px solid #21262d}
+.tl-item.expanded .tl-why{display:block}
+.tl-info{cursor:pointer}
+.tl-name::after{content:' ▸';font-size:10px;color:#484f58;transition:.15s}
+.tl-item.expanded .tl-name::after{content:' ▾'}
+.tl-skip{opacity:.4;text-decoration:line-through}
+.tl-ramp{opacity:.35;pointer-events:auto}
+.tl-ramp .tl-check{border-color:#21262d;pointer-events:none}
+.ramp-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;background:#1f6feb;color:#fff;margin-left:6px;vertical-align:middle}
+.ramp-badge.inactive{background:#30363d;color:#8b949e}
+.phase-card{background:#1c2128;border:1px solid #30363d;border-radius:10px;padding:12px 16px;margin-bottom:16px;text-align:center}
+.phase-week{font-size:22px;font-weight:800;color:#58a6ff}
+.phase-label{font-size:12px;color:#8b949e;margin-top:2px}
+.phase-active{font-size:11px;color:#3fb950;margin-top:6px}
+
+/* ── FOOD TAGS ── */
+.ftags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.ft{padding:3px 10px;border-radius:14px;font-size:11px;font-weight:600}
+.ft-r{background:#3d1214;color:#f85149}.ft-y{background:#3d2e00;color:#e3b341}.ft-g{background:#0d2818;color:#3fb950}
+
+/* ── EXERCISE TABLE ── */
+.ex-day{background:#161b22;border:1px solid #30363d;border-radius:10px;margin-bottom:10px;overflow:hidden}
+.ex-day-h{padding:10px 14px;font-weight:700;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.ex-day-h .day-type{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
+.ex-items{padding:0 14px 12px}
+.ex-item{padding:6px 0;border-bottom:1px solid #21262d;font-size:13px;color:#b1bac4}
+.ex-item:last-child{border-bottom:none}
+.ex-item strong{color:#f0f6fc}
+
+/* ── STAT ROW ── */
+.sr{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid #21262d}
+.sr:last-child{border-bottom:none}
+.sr-l{color:#8b949e}.sr-v{font-weight:600}
+
+/* ── PROGRESS ── */
+.prog-bar{height:6px;background:#21262d;border-radius:3px;margin-top:8px;overflow:hidden}
+.prog-fill{height:100%;background:#238636;border-radius:3px;transition:.3s}
+
+/* ── DIALS ── */
+.dial-row{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin:20px 0}
+.dial-card{text-align:center;flex:1;min-width:100px;max-width:140px}
+.dial-svg{width:100%;max-width:140px}
+.dial-label{font-size:12px;font-weight:700;color:#8b949e;margin-top:6px}
+.dial-arc-bg{fill:none;stroke:#21262d;stroke-width:10;stroke-linecap:round}
+.dial-arc{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .5s ease}
+.dial-arc-supp{stroke:#238636}.dial-arc-ex{stroke:#58a6ff}.dial-arc-plan{stroke:#d29922}
+
+/* ── PLAN CHECKBOXES ── */
+.plan-row{display:flex;align-items:flex-start;padding:5px 0;gap:8px;border-bottom:1px solid #21262d;font-size:13px;color:#b1bac4}
+.plan-row:last-child{border-bottom:none}
+.plan-row .tl-check{width:18px;height:18px;flex-shrink:0;margin-top:1px}
+.plan-row.done span{opacity:.5;text-decoration:line-through}
+
+/* ── STREAK ── */
+.streak-row{display:flex;gap:4px;justify-content:center;margin:12px 0}
+.streak-dot{width:20px;height:20px;border-radius:50%;background:#21262d;font-size:9px;display:flex;align-items:center;justify-content:center;color:#484f58;font-weight:600}
+.streak-dot.done{background:#238636;color:#fff}
+.streak-dot.today{border:2px solid #58a6ff}
+
+/* ── CALENDAR ── */
+.cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cal-nav button{background:none;border:none;color:#58a6ff;font-size:20px;padding:4px 12px;cursor:pointer}
+.cal-nav span{font-size:14px;font-weight:700;color:#f0f6fc}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:10px;color:#484f58;font-weight:600;margin-bottom:4px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;font-size:11px;font-weight:600;cursor:pointer;transition:.15s;position:relative;max-width:38px;margin:0 auto}
+.cal-day:active{transform:scale(.92)}
+.cal-day.empty{background:transparent;cursor:default}
+.cal-day.no-data{background:#161b22;color:#484f58}
+.cal-day.low{background:#3d1214;color:#f85149}
+.cal-day.mid{background:#3d2e00;color:#e3b341}
+.cal-day.high{background:#0d2818;color:#3fb950}
+.cal-day.perfect{background:#238636;color:#fff}
+.cal-day.today-ring{box-shadow:0 0 0 2px #58a6ff}
+.cal-day.selected{box-shadow:0 0 0 2.5px #f0f6fc;transform:scale(1.1)}
+.cal-day .cal-dot{width:4px;height:4px;border-radius:50%;margin-top:2px}
+.cal-detail{background:#1c2128;border:1px solid #30363d;border-radius:8px;padding:12px;margin-top:10px;display:none}
+.cal-detail.show{display:block}
+.cal-detail-date{font-size:13px;font-weight:700;color:#f0f6fc;margin-bottom:8px}
+.cal-mini-bar{height:6px;background:#21262d;border-radius:3px;overflow:hidden;margin:4px 0}
+.cal-mini-fill{height:100%;border-radius:3px;transition:.3s}
+
+/* ── AVERAGES ── */
+.avg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.avg-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:10px;text-align:center}
+.avg-label{font-size:10px;color:#484f58;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.avg-val{font-size:22px;font-weight:800;margin:4px 0}
+.avg-sub{font-size:10px;color:#8b949e}
+
+.disclaimer{font-size:11px;color:#484f58;margin-top:24px;padding:12px 16px;border-top:1px solid #21262d;text-align:center}
+
+/* ── LAB HISTORY ── */
+.lh-toggle{display:flex;gap:4px;margin-bottom:16px;background:#0d1117;border-radius:8px;padding:3px;border:1px solid #30363d}
+.lh-toggle-btn{flex:1;padding:8px;text-align:center;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:#8b949e;transition:.2s}
+.lh-toggle-btn.active{background:#1f6feb;color:#fff}
+.lh-panel{display:none}.lh-panel.active{display:block}
+.lh-date-bar{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:16px;-webkit-overflow-scrolling:touch}
+.lh-date-chip{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid #30363d;background:#161b22;color:#8b949e;cursor:pointer;white-space:nowrap;transition:.2s;flex-shrink:0}
+.lh-date-chip.active{background:#1f6feb;color:#fff;border-color:#1f6feb}
+.lh-cat-h{font-size:13px;font-weight:700;color:#58a6ff;padding:8px 0 6px;border-bottom:1px solid #21262d;margin-top:14px}
+.lh-row{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid #161b22;font-size:12px;gap:6px}
+.lh-row:last-child{border-bottom:none}
+.lh-name{flex:1;color:#b1bac4;min-width:0}
+.lh-val{width:60px;text-align:right;font-weight:700;color:#f0f6fc;flex-shrink:0}
+.lh-ref{width:90px;text-align:right;font-size:10px;color:#484f58;flex-shrink:0}
+.lh-trend{width:22px;text-align:center;font-size:14px;flex-shrink:0}
+.lh-flag{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;margin-left:4px}
+.lh-h{background:#3d1214;color:#f85149}.lh-l{background:#3d2e00;color:#e3b341}.lh-ok{background:#0d2818;color:#3fb950}
+.lh-compare{display:flex;gap:8px;margin-bottom:16px}
+.lh-compare-card{flex:1;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:10px;text-align:center}
+.lh-compare-date{font-size:10px;color:#484f58;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.lh-compare-val{font-size:20px;font-weight:800;margin:4px 0}
+.lh-compare-arrow{font-size:18px;display:flex;align-items:center;flex-shrink:0;width:20px;justify-content:center}
+.lh-allergy-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.lh-allergy-item{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:8px 10px;font-size:11px}
+.lh-allergy-name{font-weight:600;color:#f0f6fc}
+.lh-allergy-val{color:#8b949e;margin-top:2px}
+.lh-supp-snap{margin-top:12px;padding:10px 14px;background:#1c2128;border:1px solid #30363d;border-radius:8px;font-size:12px;color:#b1bac4}
+.lh-supp-snap strong{color:#f0f6fc}
+.lh-note{font-size:11px;color:#484f58;margin-top:4px;font-style:italic}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- TAB 0: SUMMARY -->
+<!-- ══════════════════════════════════════════ -->
+<div class="tab active" id="tab-summary">
+<div class="tab-title">Today's Progress</div>
+<p class="tab-sub" id="summary-date"></p>
+
+<div class="card" style="border-left:3px solid #238636;text-align:center;padding:20px 16px">
+<div style="font-size:13px;color:#8b949e;margin-bottom:4px">7-Day Streak</div>
+<div class="streak-row" id="streak-row"></div>
+</div>
+
+<div class="dial-row">
+<div class="dial-card">
+<svg viewBox="0 0 140 85" class="dial-svg" id="supp-dial">
+<path d="M 15 75 A 55 55 0 0 1 125 75" class="dial-arc-bg"/>
+<path d="M 15 75 A 55 55 0 0 1 125 75" class="dial-arc dial-arc-supp" id="supp-arc" style="stroke-dasharray:172.8;stroke-dashoffset:172.8"/>
+<text x="70" y="55" text-anchor="middle" fill="#f0f6fc" font-size="26" font-weight="800" id="supp-pct">0%</text>
+<text x="70" y="72" text-anchor="middle" fill="#8b949e" font-size="11" id="supp-count">0/0</text>
+</svg>
+<div class="dial-label">Supplements</div>
+</div>
+<div class="dial-card">
+<svg viewBox="0 0 140 85" class="dial-svg" id="ex-dial">
+<path d="M 15 75 A 55 55 0 0 1 125 75" class="dial-arc-bg"/>
+<path d="M 15 75 A 55 55 0 0 1 125 75" class="dial-arc dial-arc-ex" id="ex-arc" style="stroke-dasharray:172.8;stroke-dashoffset:172.8"/>
+<text x="70" y="55" text-anchor="middle" fill="#f0f6fc" font-size="26" font-weight="800" id="ex-pct">0%</text>
+<text x="70" y="72" text-anchor="middle" fill="#8b949e" font-size="11" id="ex-count">0/0</text>
+</svg>
+<div class="dial-label">Exercise</div>
+</div>
+<div class="dial-card">
+<svg viewBox="0 0 140 85" class="dial-svg" id="plan-dial">
+<path d="M 15 75 A 55 55 0 0 1 125 75" class="dial-arc-bg"/>
+<path d="M 15 75 A 55 55 0 0 1 125 75" class="dial-arc dial-arc-plan" id="plan-arc" style="stroke-dasharray:172.8;stroke-dashoffset:172.8"/>
+<text x="70" y="55" text-anchor="middle" fill="#f0f6fc" font-size="26" font-weight="800" id="plan-pct">0%</text>
+<text x="70" y="72" text-anchor="middle" fill="#8b949e" font-size="11" id="plan-count">0/0</text>
+</svg>
+<div class="dial-label">Action Items</div>
+</div>
+</div>
+
+<div class="card" style="margin-top:16px">
+<div style="font-size:13px;font-weight:700;color:#f0f6fc;margin-bottom:8px">Quick Stats</div>
+<div class="sr"><span class="sr-l">Day Type</span><span class="sr-v" id="sum-daytype">Training</span></div>
+<div class="sr"><span class="sr-l">Total Pills Today</span><span class="sr-v" id="sum-pills">34</span></div>
+<div class="sr"><span class="sr-l">Omega-3 Total</span><span class="sr-v">2,560mg (4 softgels)</span></div>
+<div class="sr"><span class="sr-l">Protocol Day</span><span class="sr-v" id="sum-protday">—</span></div>
+</div>
+
+<!-- Calendar -->
+<div class="card" style="margin-top:16px">
+<div style="font-size:13px;font-weight:700;color:#f0f6fc;margin-bottom:10px">History</div>
+<div class="cal-nav">
+<button onclick="calPrev()">‹</button>
+<span id="cal-month-label"></span>
+<button onclick="calNext()">›</button>
+</div>
+<div class="cal-dow"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+<div class="cal-grid" id="cal-grid"></div>
+<div class="cal-detail" id="cal-detail">
+<div class="cal-detail-date" id="cal-detail-date"></div>
+<div class="sr"><span class="sr-l" style="color:#238636">Supplements</span><span class="sr-v" id="cd-supp">—</span></div>
+<div class="cal-mini-bar"><div class="cal-mini-fill" id="cd-supp-bar" style="background:#238636;width:0"></div></div>
+<div class="sr"><span class="sr-l" style="color:#58a6ff">Exercise</span><span class="sr-v" id="cd-ex">—</span></div>
+<div class="cal-mini-bar"><div class="cal-mini-fill" id="cd-ex-bar" style="background:#58a6ff;width:0"></div></div>
+<div class="sr"><span class="sr-l" style="color:#d29922">Action Items</span><span class="sr-v" id="cd-plan">—</span></div>
+<div class="cal-mini-bar"><div class="cal-mini-fill" id="cd-plan-bar" style="background:#d29922;width:0"></div></div>
+</div>
+</div>
+
+<!-- Rolling Averages -->
+<div class="card" style="margin-top:10px">
+<div style="font-size:13px;font-weight:700;color:#f0f6fc;margin-bottom:8px">Rolling Averages</div>
+<div class="avg-grid">
+<div class="avg-card">
+<div class="avg-label">This Week</div>
+<div class="avg-val" id="avg-week" style="color:#238636">—</div>
+<div class="avg-sub">7-day avg</div>
+</div>
+<div class="avg-card">
+<div class="avg-label">This Month</div>
+<div class="avg-val" id="avg-month" style="color:#58a6ff">—</div>
+<div class="avg-sub">30-day avg</div>
+</div>
+<div class="avg-card">
+<div class="avg-label">Quarter</div>
+<div class="avg-val" id="avg-quarter" style="color:#d29922">—</div>
+<div class="avg-sub">90-day avg</div>
+</div>
+<div class="avg-card">
+<div class="avg-label">Year</div>
+<div class="avg-val" id="avg-year" style="color:#f0f6fc">—</div>
+<div class="avg-sub">365-day avg</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- TAB 1: DASHBOARD -->
+<!-- ══════════════════════════════════════════ -->
+<div class="tab" id="tab-dash">
+<div class="tab-title">Dashboard</div>
+<p class="tab-sub">Function Health &bull; Aug 2026 &bull; 159 Biomarkers</p>
+
+<div class="lh-toggle">
+<button class="lh-toggle-btn active" onclick="showLabPanel('analysis')">Analysis</button>
+<button class="lh-toggle-btn" onclick="showLabPanel('history')">Lab History</button>
+</div>
+
+<div class="lh-panel active" id="lh-analysis">
+
+<div class="card" style="border-left:3px solid #f85149">
+<div class="card-b"><strong style="color:#f0f6fc">The Big Picture:</strong> Your organs are healthy, inflammation is elite (0.2), testosterone is strong (729), and cancer screen is clear. But you have <strong style="color:#f85149">early metabolic syndrome signals</strong> — elevated fasting glucose, insulin above optimal, high ferritin, and atherogenic LDL particles. At 21.6% body fat with an athletic build (189 lbs, significant lean mass from strength training + BJJ), these markers likely point to visceral fat around organs rather than overall excess weight. Your liver is overproducing small dense LDL particles. A1c is still 5.1% — you're catching this early. Reducing visceral fat while preserving muscle is the master lever.</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><span class="badge br">Act Now</span><h2>Red Flags</h2></div>
+
+<div class="card">
+<div class="card-h"><span class="card-t">1. Ferritin — 432 ng/mL</span><span class="card-v vr">Above range</span></div>
+<div class="card-b">Optimal 70–150, lab max 380. Your iron, saturation, and TIBC are normal — this isn't iron overload. Isolated high ferritin at your body composition tracks with metabolic stress or early fatty liver, likely driven by visceral fat.</div>
+<div class="action"><strong>Action:</strong> Get a liver ultrasound (rule out NAFLD). Consider blood donation — fastest way to lower ferritin. Retest in 90 days.</div>
+</div>
+
+<div class="card">
+<div class="card-h"><span class="card-t">2. LDL Particles — Atherogenic</span><span class="card-v vr">6 markers out</span></div>
+<div class="card-b">LDL-P 1413, LDL Small 251, LDL Medium 363, LDL-C 100, peak size 221.5Å (below 222.9), HDL Large 6311 (below 6729). Too many small dense particles. ApoB (79) and trigs (68) are great, so this is genetic + visceral fat driven.</div>
+<div class="action"><strong>Action:</strong> Natural approach first — add soluble fiber (psyllium 5g/day), increase omega-3, reduce saturated fat, add berberine HCl. Visceral fat loss will shift particles from small/dense to large/buoyant. Retest in 90 days. Family history (high cholesterol, hypertension, TIA) means your doctor should be aware.</div>
+</div>
+
+<div class="card">
+<div class="card-h"><span class="card-t">3. Glucose 103 + Insulin 6.2</span><span class="card-v vr">Pre-diabetic range</span></div>
+<div class="card-b">Fasting glucose above 100 = impaired fasting glucose. Insulin 6.2 (optimal 2–5) = pancreas compensating. A1c 5.1% is still fine — this is where insulin resistance shows first. HOMA-IR ~1.6 (borderline).</div>
+<div class="action"><strong>Action:</strong> Post-meal walks (10–15 min). Protein + fat first at meals (no naked carbs). Consider berberine 500mg with meals. Consider 2-week CGM trial. Retest 90 days.</div>
+</div>
+
+<div class="card">
+<div class="card-h"><span class="card-t">4. Shrimp — IgE Allergy</span><span class="card-v vr">True allergy</span></div>
+<div class="card-b">Real IgE-mediated allergy, not a sensitivity. Can escalate unpredictably. All other seafood IgE negative (salmon, tuna, lobster, crab, clam, scallop, cod).</div>
+<div class="action"><strong>Action:</strong> Avoid shrimp 100%. See allergist for skin-prick confirmation. Discuss EpiPen for seafood restaurant cross-contamination risk.</div>
+</div>
+
+<div class="card">
+<div class="card-h"><span class="card-t">5. Vitamin D — 37 ng/mL</span><span class="card-v vy">Below optimal</span></div>
+<div class="card-b">In range (30–100) but optimal is 45+. At 37 you're leaving immune support, insulin sensitivity, and T optimization on the table. Current 4,000 IU isn't enough.</div>
+<div class="action"><strong>Action:</strong> Increase to 5,000–6,000 IU D3 daily with fattiest meal. Verify K2 MK-7 ≥200mcg. Target 50–60 ng/mL on retest.</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><span class="badge by">Monitor</span><h2>Watch These</h2></div>
+<div class="g2">
+<div class="card"><div class="card-h"><span class="card-t">FSH — 14.3</span><span class="card-v vy">Above 12.8</span></div><div class="card-b">Brain pushing slightly harder to maintain T. Normal at 41. T (729) and LH (5.3) are solid. Retest 6 months.</div></div>
+<div class="card"><div class="card-h"><span class="card-t">Uric Acid — 7.6</span><span class="card-v vy">Optimal 4–5.5</span></div><div class="card-b">Tied to insulin resistance. Fixing glucose/insulin will likely lower this. Reduce fructose, stay hydrated.</div></div>
+<div class="card"><div class="card-h"><span class="card-t">SHBG — 49</span><span class="card-v vy">Upper end</span></div><div class="card-b">Binds T, reducing free T. Free T (99.1) still healthy. May drop with moderate carbs around training.</div></div>
+<div class="card"><div class="card-h"><span class="card-t">Mercury — 6 mcg/L</span><span class="card-v vy">Detectable</span></div><div class="card-b">Below limit (11) but optimal is 0. Switch to lower-mercury fish: salmon, sardines, anchovies.</div></div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><span class="badge bg">Strong</span><h2>What's Working</h2></div>
+<div class="g2">
+<div class="card"><div class="card-h"><span class="card-t">Testosterone</span><span class="card-v vg">729 ng/dL</span></div><div class="card-b">Total 729, Free 99.1. Excellent for 41 without TRT. Tongkat ali + training doing the job.</div></div>
+<div class="card"><div class="card-h"><span class="card-t">Inflammation</span><span class="card-v vg">hs-CRP 0.2</span></div><div class="card-b">Elite level. Protects you from the LDL particles causing immediate damage.</div></div>
+<div class="card"><div class="card-h"><span class="card-t">Lp(a)</span><span class="card-v vg"><10</span></div><div class="card-b">Genetic win. #1 inherited heart risk factor — you don't have it.</div></div>
+<div class="card"><div class="card-h"><span class="card-t">Thyroid</span><span class="card-v vg">Perfect</span></div><div class="card-b">TSH 1.52, T4 1.5, T3 3.9. Zero autoimmune antibodies.</div></div>
+<div class="card"><div class="card-h"><span class="card-t">Kidney</span><span class="card-v vg">eGFR 91</span></div><div class="card-b">No protein/blood in urine. Creatine + high-protein diet isn't hurting kidneys.</div></div>
+<div class="card"><div class="card-h"><span class="card-t">Liver Enzymes</span><span class="card-v vg">Optimal</span></div><div class="card-b">ALT 23, AST 25, GGT 16. Still get ultrasound — fatty liver can exist with normal enzymes.</div></div>
+<div class="card"><div class="card-h"><span class="card-t">Cancer Screen</span><span class="card-v vg">Clear</span></div><div class="card-b">Galleri: no signal. PSA 0.3. Continue routine screenings.</div></div>
+<div class="card"><div class="card-h"><span class="card-t">Triglycerides</span><span class="card-v vg">68</span></div><div class="card-b">Excellent. ApoB 79 optimal. Problem is particle subfractions, not traditional lipids.</div></div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><span class="badge bb">Food</span><h2>IgG Sensitivities</h2></div>
+<div class="card">
+<div class="card-b">IgG sensitivities (not true allergies except shrimp). Correlate with your bloating, diarrhea, gas. Gut immune system is in "heightened reactivity" per clinician. Cross-referenced with Viome below.</div>
+<div style="margin-top:10px"><div style="font-size:11px;color:#8b949e;font-weight:600;margin-bottom:4px">ELEVATED — ELIMINATE OR REDUCE:</div>
+<div class="ftags">
+<span class="ft ft-r">Dairy/Casein (7.4 — highest)</span>
+<span class="ft ft-r">Wheat</span>
+<span class="ft ft-r">Corn</span>
+<span class="ft ft-r">Peanuts</span>
+<span class="ft ft-y">Chocolate/Cacao</span>
+<span class="ft ft-y">Coffee (also Viome MINIMIZE)</span>
+<span class="ft ft-y">Yeast</span>
+</div></div>
+<div class="action" style="margin-top:10px"><strong>Plan:</strong> 4-week strict elimination of dairy, wheat, corn, peanuts. Then reintroduce one every 3 days. Coffee — switch to green tea (Viome SUPERFOOD). This aligns with your lactose intolerance and almond allergy you already manage.</div>
+</div>
+</div>
+</div>
+
+<!-- close analysis panel -->
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- LAB HISTORY PANEL -->
+<!-- ══════════════════════════════════════════ -->
+<div class="lh-panel" id="lh-history">
+
+<div class="card" style="border-left:3px solid #1f6feb">
+<div class="card-b"><strong style="color:#f0f6fc">Lab History:</strong> Tracking biomarkers across test dates. Your <strong style="color:#58a6ff">Inspire Health</strong> labs (Jul 14) were a routine check; <strong style="color:#58a6ff">Function Health</strong> (Jul 31) was the comprehensive 100+ biomarker panel. Arrows show direction of change between draws. No supplements were being taken at either date — protocol starts Aug 14.</div>
+</div>
+
+<div class="lh-date-bar">
+<div class="lh-date-chip active" onclick="showLabDate('all')">Compare All</div>
+<div class="lh-date-chip" onclick="showLabDate('jul14')">Jul 14 — Inspire</div>
+<div class="lh-date-chip" onclick="showLabDate('jul31')">Jul 31 — Function</div>
+<div class="lh-date-chip" onclick="showLabDate('aug3')">Aug 3 — Allergies</div>
+</div>
+
+<!-- Key Biomarker Trends -->
+<div class="card" id="lh-trends">
+<div style="font-size:14px;font-weight:700;color:#f0f6fc;margin-bottom:10px">Key Biomarker Trends</div>
+
+<div class="lh-cat-h">Metabolic</div>
+<div class="lh-row"><span class="lh-name">Glucose (fasting)</span><span class="lh-val">94</span><span class="lh-trend" style="color:#f85149">→</span><span class="lh-val">103<span class="lh-flag lh-h">H</span></span><span class="lh-ref">65-99 mg/dL</span></div>
+<div class="lh-row"><span class="lh-name">HbA1c</span><span class="lh-val">5.2</span><span class="lh-trend" style="color:#3fb950">→</span><span class="lh-val">5.1</span><span class="lh-ref"><5.7%</span></div>
+<div class="lh-row"><span class="lh-name">Insulin</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">6.2</span><span class="lh-ref"><18.4 uIU/mL</span></div>
+<div class="lh-row"><span class="lh-name">Uric Acid</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">7.6</span><span class="lh-ref">4.0-8.0 mg/dL</span></div>
+
+<div class="lh-cat-h">Lipids</div>
+<div class="lh-row"><span class="lh-name">Total Cholesterol</span><span class="lh-val">155</span><span class="lh-trend" style="color:#e3b341">↑</span><span class="lh-val">173</span><span class="lh-ref"><200 mg/dL</span></div>
+<div class="lh-row"><span class="lh-name">HDL</span><span class="lh-val">54</span><span class="lh-trend" style="color:#3fb950">↑</span><span class="lh-val">58</span><span class="lh-ref">>40 mg/dL</span></div>
+<div class="lh-row"><span class="lh-name">LDL</span><span class="lh-val">84</span><span class="lh-trend" style="color:#f85149">↑</span><span class="lh-val">100<span class="lh-flag lh-h">H</span></span><span class="lh-ref"><100 mg/dL</span></div>
+<div class="lh-row"><span class="lh-name">Triglycerides</span><span class="lh-val">81</span><span class="lh-trend" style="color:#3fb950">↓</span><span class="lh-val">68</span><span class="lh-ref"><150 mg/dL</span></div>
+<div class="lh-row"><span class="lh-name">Non-HDL</span><span class="lh-val">101</span><span class="lh-trend" style="color:#e3b341">↑</span><span class="lh-val">115</span><span class="lh-ref"><130 mg/dL</span></div>
+<div class="lh-row"><span class="lh-name">Chol/HDL Ratio</span><span class="lh-val">2.9</span><span class="lh-trend" style="color:#484f58">→</span><span class="lh-val">3.0</span><span class="lh-ref"><5.0</span></div>
+<div class="lh-row"><span class="lh-name">ApoB</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">79<span class="lh-flag lh-ok">OK</span></span><span class="lh-ref"><90 mg/dL</span></div>
+<div class="lh-row"><span class="lh-name">Lp(a)</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val"><10<span class="lh-flag lh-ok">OPT</span></span><span class="lh-ref"><75 nmol/L</span></div>
+
+<div class="lh-cat-h">Iron</div>
+<div class="lh-row"><span class="lh-name">Iron, Total</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">64</span><span class="lh-ref">50-180 mcg/dL</span></div>
+<div class="lh-row"><span class="lh-name">Ferritin</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">432<span class="lh-flag lh-h">HIGH</span></span><span class="lh-ref">38-380 ng/mL</span></div>
+<div class="lh-row"><span class="lh-name">% Saturation</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">21</span><span class="lh-ref">20-48%</span></div>
+<div class="lh-row"><span class="lh-name">TIBC</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">299</span><span class="lh-ref">250-425 mcg/dL</span></div>
+
+<div class="lh-cat-h">Blood Counts (CBC)</div>
+<div class="lh-row"><span class="lh-name">WBC</span><span class="lh-val">4.7</span><span class="lh-trend" style="color:#484f58">→</span><span class="lh-val">4.9</span><span class="lh-ref">3.8-10.8 K/uL</span></div>
+<div class="lh-row"><span class="lh-name">RBC</span><span class="lh-val">4.94</span><span class="lh-trend" style="color:#484f58">→</span><span class="lh-val">5.01</span><span class="lh-ref">4.20-5.80 M/uL</span></div>
+<div class="lh-row"><span class="lh-name">Hemoglobin</span><span class="lh-val">15.1</span><span class="lh-trend" style="color:#484f58">→</span><span class="lh-val">15.2</span><span class="lh-ref">13.2-17.1 g/dL</span></div>
+<div class="lh-row"><span class="lh-name">Hematocrit</span><span class="lh-val">45.3</span><span class="lh-trend" style="color:#484f58">→</span><span class="lh-val">46.2</span><span class="lh-ref">39.4-51.1%</span></div>
+<div class="lh-row"><span class="lh-name">Platelets</span><span class="lh-val">155</span><span class="lh-trend" style="color:#484f58">→</span><span class="lh-val">157</span><span class="lh-ref">140-400 K/uL</span></div>
+
+<div class="lh-cat-h">Thyroid</div>
+<div class="lh-row"><span class="lh-name">TSH</span><span class="lh-val">0.96</span><span class="lh-trend" style="color:#e3b341">↑</span><span class="lh-val">1.52</span><span class="lh-ref">0.40-4.50 mIU/L</span></div>
+<div class="lh-row"><span class="lh-name">T4, Free</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">1.5</span><span class="lh-ref">0.8-1.8 ng/dL</span></div>
+<div class="lh-row"><span class="lh-name">T3, Free</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">3.9</span><span class="lh-ref">2.3-4.2 pg/mL</span></div>
+<div class="lh-row"><span class="lh-name">TPO Antibodies</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val"><1<span class="lh-flag lh-ok">NEG</span></span><span class="lh-ref"><9 IU/mL</span></div>
+<div class="lh-row"><span class="lh-name">Thyroglobulin Ab</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val"><2<span class="lh-flag lh-ok">NEG</span></span><span class="lh-ref"><2 IU/mL</span></div>
+
+<div class="lh-cat-h">Hormones</div>
+<div class="lh-row"><span class="lh-name">Cortisol</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">9.9</span><span class="lh-ref">4.0-22.0 mcg/dL</span></div>
+<div class="lh-row"><span class="lh-name">DHEA Sulfate</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">286</span><span class="lh-ref">61-442 mcg/dL</span></div>
+<div class="lh-row"><span class="lh-name">FSH</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">14.3<span class="lh-flag lh-h">H</span></span><span class="lh-ref">1.4-12.8 mIU/mL</span></div>
+<div class="lh-row"><span class="lh-name">LH</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">5.3</span><span class="lh-ref">1.5-9.3 mIU/mL</span></div>
+<div class="lh-row"><span class="lh-name">Estradiol</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">38</span><span class="lh-ref"><39 pg/mL</span></div>
+<div class="lh-row"><span class="lh-name">SHBG</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">49</span><span class="lh-ref">10-50 nmol/L</span></div>
+<div class="lh-row"><span class="lh-name">Prolactin</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">6.3</span><span class="lh-ref">2.0-18.0 ng/mL</span></div>
+<div class="lh-row"><span class="lh-name">Insulin</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">6.2</span><span class="lh-ref"><18.4 uIU/mL</span></div>
+<div class="lh-row"><span class="lh-name">Leptin</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">1.5</span><span class="lh-ref">0.3-13.4 ng/mL</span></div>
+
+<div class="lh-cat-h">Inflammation / Autoimmune</div>
+<div class="lh-row"><span class="lh-name">hs-CRP</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">0.2<span class="lh-flag lh-ok">ELITE</span></span><span class="lh-ref"><1.0 mg/L</span></div>
+<div class="lh-row"><span class="lh-name">Homocysteine</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">8.4</span><span class="lh-ref"><13.5 umol/L</span></div>
+<div class="lh-row"><span class="lh-name">ANA Screen</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">Neg<span class="lh-flag lh-ok">NEG</span></span><span class="lh-ref">Negative</span></div>
+<div class="lh-row"><span class="lh-name">Rheumatoid Factor</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val"><10</span><span class="lh-ref"><14 IU/mL</span></div>
+
+<div class="lh-cat-h">Liver / Kidney</div>
+<div class="lh-row"><span class="lh-name">AST</span><span class="lh-val">20</span><span class="lh-trend" style="color:#484f58">↑</span><span class="lh-val">25</span><span class="lh-ref">10-40 U/L</span></div>
+<div class="lh-row"><span class="lh-name">ALT</span><span class="lh-val">22</span><span class="lh-trend" style="color:#484f58">→</span><span class="lh-val">23</span><span class="lh-ref">9-46 U/L</span></div>
+<div class="lh-row"><span class="lh-name">Alk Phos</span><span class="lh-val">85</span><span class="lh-trend" style="color:#484f58">→</span><span class="lh-val">89</span><span class="lh-ref">36-130 U/L</span></div>
+<div class="lh-row"><span class="lh-name">GGT</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">14</span><span class="lh-ref">3-95 U/L</span></div>
+<div class="lh-row"><span class="lh-name">Bilirubin</span><span class="lh-val">0.9</span><span class="lh-trend" style="color:#484f58">→</span><span class="lh-val">0.8</span><span class="lh-ref">0.2-1.2 mg/dL</span></div>
+<div class="lh-row"><span class="lh-name">eGFR</span><span class="lh-val">90</span><span class="lh-trend" style="color:#3fb950">↑</span><span class="lh-val">91</span><span class="lh-ref">>60 mL/min</span></div>
+<div class="lh-row"><span class="lh-name">Creatinine</span><span class="lh-val">1.06</span><span class="lh-trend" style="color:#3fb950">↓</span><span class="lh-val">1.05</span><span class="lh-ref">0.60-1.29 mg/dL</span></div>
+<div class="lh-row"><span class="lh-name">BUN</span><span class="lh-val">17</span><span class="lh-trend" style="color:#484f58">↓</span><span class="lh-val">12</span><span class="lh-ref">7-25 mg/dL</span></div>
+<div class="lh-row"><span class="lh-name">Lipase</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">26</span><span class="lh-ref">7-60 U/L</span></div>
+<div class="lh-row"><span class="lh-name">Amylase</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">36</span><span class="lh-ref">21-101 U/L</span></div>
+
+<div class="lh-cat-h">Cancer Screening / Prostate</div>
+<div class="lh-row"><span class="lh-name">Galleri Multi-Cancer</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val" style="font-size:11px">No Signal<span class="lh-flag lh-ok">CLEAR</span></span><span class="lh-ref">Jul 31</span></div>
+<div class="lh-row"><span class="lh-name">PSA, Total</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">0.3</span><span class="lh-ref"><4.0 ng/mL</span></div>
+<div class="lh-row"><span class="lh-name">PSA, % Free</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">33%</span><span class="lh-ref">>25%</span></div>
+
+<div class="lh-cat-h">Other</div>
+<div class="lh-row"><span class="lh-name">Vitamin D</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val">37</span><span class="lh-ref">30-100 ng/mL</span></div>
+<div class="lh-row"><span class="lh-name">Albumin, Urine</span><span class="lh-val">—</span><span class="lh-trend" style="color:#484f58"></span><span class="lh-val"><0.2<span class="lh-flag lh-ok">OK</span></span><span class="lh-ref">mg/dL</span></div>
+</div>
+
+<!-- Allergy Panel (Aug 3) -->
+<div class="card" id="lh-allergies">
+<div style="font-size:14px;font-weight:700;color:#f0f6fc;margin-bottom:4px">Allergy Panel — Aug 3, 2026</div>
+<div style="font-size:11px;color:#8b949e;margin-bottom:10px">Function Health via Quest Diagnostics</div>
+
+<div class="lh-cat-h" style="color:#f85149">IgE True Allergies (Immune-mediated)</div>
+<div class="lh-allergy-grid">
+<div class="lh-allergy-item" style="border-color:#f85149"><div class="lh-allergy-name" style="color:#f85149">Shrimp (IgE)</div><div class="lh-allergy-val">0.39-0.46 kU/L — Class 1 (Low)</div></div>
+<div class="lh-allergy-item"><div class="lh-allergy-name">All Other Seafood IgE</div><div class="lh-allergy-val"><0.10 — Class 0 (None)</div></div>
+<div class="lh-allergy-item"><div class="lh-allergy-name">All Nuts IgE</div><div class="lh-allergy-val"><0.10 — Class 0 (None)</div></div>
+<div class="lh-allergy-item"><div class="lh-allergy-name">Egg, Wheat, Soy, Milk IgE</div><div class="lh-allergy-val"><0.10 — Class 0 (None)</div></div>
+</div>
+
+<div class="lh-cat-h" style="color:#e3b341">IgG Food Sensitivities (Gut immune response)</div>
+<div class="lh-allergy-grid">
+<div class="lh-allergy-item" style="border-color:#f85149"><div class="lh-allergy-name" style="color:#f85149">Casein (Dairy)</div><div class="lh-allergy-val">7.4 mcg/mL — HIGHEST</div></div>
+<div class="lh-allergy-item" style="border-color:#f85149"><div class="lh-allergy-name" style="color:#f85149">Wheat</div><div class="lh-allergy-val">6.2 mcg/mL</div></div>
+<div class="lh-allergy-item" style="border-color:#f85149"><div class="lh-allergy-name" style="color:#f85149">Maize/Corn</div><div class="lh-allergy-val">5.6 mcg/mL</div></div>
+<div class="lh-allergy-item" style="border-color:#e3b341"><div class="lh-allergy-name" style="color:#e3b341">Peanut</div><div class="lh-allergy-val">3.8 mcg/mL</div></div>
+<div class="lh-allergy-item" style="border-color:#e3b341"><div class="lh-allergy-name" style="color:#e3b341">Cacao (Chocolate)</div><div class="lh-allergy-val">3.4 mcg/mL</div></div>
+<div class="lh-allergy-item" style="border-color:#e3b341"><div class="lh-allergy-name" style="color:#e3b341">Coffee</div><div class="lh-allergy-val">2.7 mcg/mL</div></div>
+<div class="lh-allergy-item" style="border-color:#e3b341"><div class="lh-allergy-name" style="color:#e3b341">Yeast</div><div class="lh-allergy-val">2.4 mcg/mL</div></div>
+<div class="lh-allergy-item"><div class="lh-allergy-name">Tomato, Egg, Soy, Codfish</div><div class="lh-allergy-val"><2.0 — Normal</div></div>
+</div>
+<div class="lh-note">IgG sensitivities are NOT true allergies. They indicate gut immune response — correlate with bloating, gas, diarrhea. Ref range: <2.0 mcg/mL.</div>
+</div>
+
+<!-- Supplement Snapshot at Each Test Date -->
+<div class="card">
+<div style="font-size:14px;font-weight:700;color:#f0f6fc;margin-bottom:10px">Supplement Context by Test Date</div>
+
+<div class="lh-supp-snap">
+<strong>Jul 14, 2026 — Inspire Health Draw</strong><br>
+Pre-protocol baseline. Daily stack: TRU NIAGEN 300mg, creatine 5g, tongkat ali, boron, ALA, K2 MK-7, D3 4,000 IU, ashwagandha (Youtheory), omega-3 (2 softgels), magnesium glycinate.<br>
+<span style="color:#484f58">No berberine, psyllium, butyrate, or doubled omega-3 yet.</span>
+</div>
+
+<div class="lh-supp-snap" style="margin-top:8px">
+<strong>Jul 31, 2026 — Function Health Draw</strong><br>
+Same pre-protocol stack as Jul 14. This is the comprehensive baseline before any new additions.<br>
+<span style="color:#484f58">Protocol changes (berberine, psyllium, doubled omega-3, butyrate) start Aug 14.</span>
+</div>
+
+<div class="lh-supp-snap" style="margin-top:8px;border-color:#238636">
+<strong>Next Retest Target — ~Nov 2026 (90 days)</strong><br>
+Will reflect full protocol impact: berberine 1500mg/day, psyllium 5g/day, omega-3 2,560mg/day, butyrate, D3 10,000 IU loading dose, all other supplements at full dose.<br>
+<span style="color:#3fb950">Track: glucose, insulin, ferritin, LDL particles, vitamin D — these are the targets.</span>
+</div>
+</div>
+
+<!-- Doctor Notes -->
+<div class="card">
+<div style="font-size:14px;font-weight:700;color:#f0f6fc;margin-bottom:6px">Doctor Notes</div>
+<div class="card-b"><strong>Dr. Jones (Inspire Health, Jul 14):</strong> "Overall, everything looks very good. Your cholesterol, blood sugar, kidney and liver function, blood counts, and thyroid are all within normal ranges. Your urine showed some calcium oxalate crystals, which can occur with dehydration and may increase the risk of kidney stones. Please make sure you are drinking plenty of water."</div>
+<div class="card-b" style="margin-top:8px"><strong>Urinalysis note:</strong> Jul 14 showed Trace ketones + Moderate calcium oxalate crystals (dehydration marker). Jul 31 urinalysis was completely clean — no crystals, no ketones. Hydration was better on that draw.</div>
+</div>
+
+</div>
+<!-- end lh-history panel -->
+
+</div>
+<!-- end tab-dash -->
+
+<!-- ══════════════════════════════════════════ -->
+<!-- TAB 2: EXERCISE -->
+<!-- ══════════════════════════════════════════ -->
+<div class="tab" id="tab-exercise">
+<div class="tab-title">Exercise Plan</div>
+<p class="tab-sub">Alpha Strength &bull; HIIT &bull; BJJ &bull; Z2 Cardio</p>
+
+<div class="card" style="border-left:3px solid #58a6ff">
+<div class="card-b"><strong style="color:#f0f6fc">Why this matters now:</strong> Your Function Health results show fasting glucose 103 and insulin 6.2 — early insulin resistance signals. Exercise is your #1 natural tool to fix both. Resistance training improves insulin sensitivity for 48 hours post-session. Zone 2 cardio targets visceral fat specifically (the fat driving your metabolic markers, not your overall weight). Post-meal walks blunt glucose spikes 20–30%. Your VO2 max (45.1) is above average — build on it.</div>
+</div>
+
+<div class="card" style="background:#1c1c0e;border-color:#3d3d00">
+<div class="card-b" style="color:#e3b341">⚠️ <strong>Tendon note:</strong> Bicep and rotator cuff tendonitis. On upper body days, avoid heavy pulling/pressing through pain. Substitute with isometric holds, band work, and eccentrics at 70% load. Tendons heal through progressive loading, not rest — but only pain-free loading.</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><h2>Today's Activity Tracker</h2></div>
+<div style="font-size:12px;color:#8b949e;margin-bottom:12px">Tap to check off each activity as you complete it</div>
+
+<div class="tl-block">
+<div class="tl-time">AM — Strength / Conditioning</div>
+<div class="tl-item"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Alpha Strength</div><div class="tl-detail">Upper Push / Upper Pull / Full Body — per schedule</div></div></div>
+<div class="tl-item"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Alpha Conditioning / HIIT</div><div class="tl-detail">Circuit day or conditioning finisher</div></div></div>
+<div class="tl-item"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Heavy Legs</div><div class="tl-detail">Squat / deadlift / leg press focus (Thursday)</div></div></div>
+<div class="tl-item"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Post-Workout Interval Walk/Jog — 20 min</div><div class="tl-detail">Zone 2–3, incline treadmill</div></div></div>
+</div>
+
+<div class="tl-block">
+<div class="tl-time">PM — BJJ / Evening Activity</div>
+<div class="tl-item"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">BJJ Class</div><div class="tl-detail">Evening session — skip if shoulder/recovery needs it</div></div></div>
+<div class="tl-item"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">BJJ Open Mat (Saturday)</div><div class="tl-detail">Count as training day for supplements</div></div></div>
+</div>
+
+<div class="tl-block">
+<div class="tl-time">Daily — Non-Negotiable</div>
+<div class="tl-item"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Post-Dinner Walk — 10–15 min</div><div class="tl-detail">After your ~9 PM dinner. Clears glucose 20–30% faster</div></div></div>
+<div class="tl-item"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Zone 2 Session (rest days)</div><div class="tl-detail">30–45 min at HR 120–140. Target: 150+ min/week total</div></div></div>
+<div class="tl-item"><div class="tl-check" onclick="toggleCheck(this)"></div><div class="tl-info"><div class="tl-name">Tendon Rehab</div><div class="tl-detail">Isometric bicep holds + band rotator cuff + eccentric curls</div></div></div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><h2>Weekly Schedule</h2></div>
+
+<div class="ex-day">
+<div class="ex-day-h" style="background:#1a2332;color:#58a6ff">Monday — Alpha Strength + BJJ<span class="day-type" style="background:#238636;color:#fff">Training</span></div>
+<div class="ex-items">
+<div class="ex-item"><strong>5:15 AM</strong> — TRU NIAGEN + green tea (fasted) → pre-workout stack</div>
+<div class="ex-item"><strong>6:00 AM</strong> — Alpha Strength (Lifetime) — Upper Push focus</div>
+<div class="ex-item"><strong>7:00 AM</strong> — 20 min interval walk/jog (Zone 2–3, incline treadmill)</div>
+<div class="ex-item"><strong>7:30 AM</strong> — Post-workout shake</div>
+<div class="ex-item"><strong>PM</strong> — BJJ class (if shoulder allows)</div>
+</div>
+</div>
+
+<div class="ex-day">
+<div class="ex-day-h" style="background:#1a2332;color:#58a6ff">Tuesday — Alpha Strength + BJJ<span class="day-type" style="background:#238636;color:#fff">Training</span></div>
+<div class="ex-items">
+<div class="ex-item"><strong>6:00 AM</strong> — Alpha Strength — Upper Pull focus</div>
+<div class="ex-item"><strong>7:00 AM</strong> — 20 min interval walk/jog</div>
+<div class="ex-item"><strong>PM</strong> — BJJ class</div>
+</div>
+</div>
+
+<div class="ex-day">
+<div class="ex-day-h" style="background:#1a2332;color:#58a6ff">Wednesday — Alpha Strength + BJJ<span class="day-type" style="background:#238636;color:#fff">Training</span></div>
+<div class="ex-items">
+<div class="ex-item"><strong>6:00 AM</strong> — Alpha Strength — Full Body / HIIT circuit</div>
+<div class="ex-item"><strong>7:00 AM</strong> — 20 min interval walk/jog</div>
+<div class="ex-item"><strong>PM</strong> — BJJ class</div>
+</div>
+</div>
+
+<div class="ex-day">
+<div class="ex-day-h" style="background:#1a2332;color:#58a6ff">Thursday — Heavy Legs<span class="day-type" style="background:#238636;color:#fff">Training</span></div>
+<div class="ex-items">
+<div class="ex-item"><strong>6:00 AM</strong> — Heavy Legs (squat/deadlift/leg press focus)</div>
+<div class="ex-item"><strong>7:00 AM</strong> — 20 min interval walk/jog</div>
+<div class="ex-item"><strong>PM</strong> — BJJ optional (listen to recovery)</div>
+</div>
+</div>
+
+<div class="ex-day">
+<div class="ex-day-h" style="background:#0d2818;color:#3fb950">Friday — Active Recovery<span class="day-type" style="background:#1f6feb;color:#fff">Z2 / Rest</span></div>
+<div class="ex-items">
+<div class="ex-item"><strong>AM</strong> — 30–45 min Zone 2 cardio (incline walk, bike, or easy jog — HR 120–140)</div>
+<div class="ex-item"><strong>Why Z2:</strong> Burns fat preferentially, improves mitochondrial density, lowers fasting glucose. Your VO2 max (45.1) will climb. Peter Attia's "most important exercise for longevity."</div>
+</div>
+</div>
+
+<div class="ex-day">
+<div class="ex-day-h" style="background:#0d2818;color:#3fb950">Saturday — Z2 Cardio or BJJ Open Mat<span class="day-type" style="background:#1f6feb;color:#fff">Z2 / Rest</span></div>
+<div class="ex-items">
+<div class="ex-item"><strong>AM</strong> — 30–45 min Zone 2 or BJJ open mat</div>
+<div class="ex-item">Keep heart rate ≤140 if doing Z2. If BJJ, count it as training day for supplements.</div>
+</div>
+</div>
+
+<div class="ex-day">
+<div class="ex-day-h" style="background:#0d2818;color:#3fb950">Sunday — Off<span class="day-type" style="background:#30363d;color:#8b949e">Rest</span></div>
+<div class="ex-items">
+<div class="ex-item">Full rest or easy 20 min walk. Mobility/stretching for tendons.</div>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><h2>Non-Negotiable Additions</h2></div>
+<div class="card">
+<div class="card-t" style="margin-bottom:6px">Post-Meal Walk — 10–15 min</div>
+<div class="card-b">After your largest meal every day. Proven to reduce glucose spikes 20–30%. This directly addresses your fasting glucose 103 and insulin 6.2. Walking, not running — moderate pace is optimal for glucose disposal.</div>
+</div>
+<div class="card">
+<div class="card-t" style="margin-bottom:6px">Zone 2 Target — 150+ min/week</div>
+<div class="card-b">Between your post-workout intervals (20 min × 4 = 80 min) and Friday/Saturday Z2 sessions (30–45 min × 2 = 60–90 min), you'll hit 140–170 min. This is the range that drives visceral fat loss and insulin sensitivity improvement.</div>
+</div>
+<div class="card">
+<div class="card-t" style="margin-bottom:6px">Tendon Rehab Protocol</div>
+<div class="card-b">Daily: 3×15 sec isometric bicep hold at 70% max. 3×10 band external rotation for rotator cuff. Eccentric-only curls 3×8 at light weight (4-sec lowering). Collagen 15g + vitamin C 30 min before rehab work for tendon collagen synthesis (Shaw 2017).</div>
+</div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- TAB 3: DIET -->
+<!-- ══════════════════════════════════════════ -->
+<div class="tab" id="tab-diet">
+<div class="tab-title">Diet Plan</div>
+<p class="tab-sub">Viome + Function Health + Longevity Aligned</p>
+
+<div class="card" style="border-left:3px solid #58a6ff">
+<div class="card-b"><strong style="color:#f0f6fc">Targets:</strong> ~2,000–2,200 cal (deficit for fat loss) &bull; 180g+ protein (1g/lb target) &bull; 150g carbs (moderate, timed around training) &bull; 70–80g fat &bull; 30g+ fiber. This supports visceral fat loss while preserving your lean mass. Your Function Health glucose/insulin issues respond best to protein + fat first, carbs last at meals.</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><span class="badge br">Avoid</span><h2>Do Not Eat</h2></div>
+<div class="card">
+<div class="ftags">
+<span class="ft ft-r">Shrimp (IgE allergy)</span>
+<span class="ft ft-r">Almonds / almond milk (allergy)</span>
+<span class="ft ft-r">Dairy / casein (IgG + lactose intol.)</span>
+<span class="ft ft-r">Broccoli (Viome AVOID)</span>
+<span class="ft ft-r">Asparagus (Viome AVOID)</span>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><span class="badge by">Minimize</span><h2>Reduce or Eliminate</h2></div>
+<div class="card">
+<div class="ftags">
+<span class="ft ft-y">Wheat / gluten (IgG elevated)</span>
+<span class="ft ft-y">Corn (IgG elevated)</span>
+<span class="ft ft-y">Peanuts (IgG elevated)</span>
+<span class="ft ft-y">Coffee (IgG + Viome MINIMIZE)</span>
+<span class="ft ft-y">Chocolate / cacao (IgG elevated)</span>
+<span class="ft ft-y">Yeast / baked goods (IgG elevated)</span>
+<span class="ft ft-y">Eggs (Viome MINIMIZE)</span>
+<span class="ft ft-y">Banana (Viome MINIMIZE)</span>
+<span class="ft ft-y">Garlic (Viome MINIMIZE)</span>
+</div>
+<div class="card-b" style="margin-top:8px">Coffee → switch to green tea or matcha (Viome SUPERFOOD). Wheat → use rice, sweet potato, quinoa for carbs. Peanuts → use sunflower seed butter.</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><span class="badge bg">Prioritize</span><h2>Build Meals Around These</h2></div>
+<div class="card">
+<div style="font-size:11px;color:#8b949e;font-weight:600;margin-bottom:4px">VIOME SUPERFOODS:</div>
+<div class="ftags">
+<span class="ft ft-g">Green Tea / Matcha</span>
+<span class="ft ft-g">Ginger</span>
+<span class="ft ft-g">MCT Oil</span>
+<span class="ft ft-g">Celery</span>
+<span class="ft ft-g">Cinnamon</span>
+<span class="ft ft-g">Cranberry</span>
+<span class="ft ft-g">Mussels</span>
+<span class="ft ft-g">Mahi Mahi</span>
+<span class="ft ft-g">Salmon</span>
+<span class="ft ft-g">Sardines</span>
+</div>
+<div style="font-size:11px;color:#8b949e;font-weight:600;margin-bottom:4px;margin-top:10px">VIOME ENJOY:</div>
+<div class="ftags">
+<span class="ft ft-g">Blueberries</span>
+<span class="ft ft-g">Sweet Potato</span>
+<span class="ft ft-g">Rice</span>
+<span class="ft ft-g">Chicken</span>
+<span class="ft ft-g">Turkey</span>
+<span class="ft ft-g">Avocado</span>
+<span class="ft ft-g">Olive Oil</span>
+<span class="ft ft-g">Spinach</span>
+<span class="ft ft-g">Cucumber</span>
+<span class="ft ft-g">Bell Peppers</span>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><h2>Sample Day — Training Day</h2></div>
+
+<div class="card">
+<div class="tl-time">5:15 AM — Fasted (longevity)</div>
+<div class="card-b">TRU NIAGEN 300mg + green tea only. Zero calories — true fast preserved until post-workout at 7:30 AM.</div>
+</div>
+
+<div class="card">
+<div class="tl-time">7:30 AM — Post-Workout</div>
+<div class="card-b">Collagen 15g + vitamin C 50mg + glycine 3g in water (always). Optional: NAKED Whey ISO ~1.5 scoops (45–50g protein) + MCT oil + blueberries when practical. ~65–435 cal.</div>
+</div>
+
+<div class="card">
+<div class="tl-time">12:00 PM — Lunch</div>
+<div class="card-b">Salmon or mahi mahi 8oz (48g protein) + rice ¾ cup (35g carbs) + spinach/celery side + olive oil drizzle + ginger dressing. ~550 cal, 48P / 40C / 18F. Take Viome pack + tongkat + boron + ALA with meal.</div>
+</div>
+
+<div class="card">
+<div class="tl-time">3:00 PM — Snack (if needed)</div>
+<div class="card-b">Turkey slices 4oz + avocado ½ + cucumber. ~250 cal, 28P / 5C / 14F.</div>
+</div>
+
+<div class="card">
+<div class="tl-time">6:30 PM — Dinner + Post-Meal Walk</div>
+<div class="card-b">Chicken thigh 8oz (46g protein) + sweet potato 1 medium (35g carbs) + mixed greens + olive oil. ~580 cal, 46P / 40C / 20F. Take ashwagandha + omega-3. Walk 10–15 min after.</div>
+</div>
+
+<div class="card" style="border-left:3px solid #e3b341">
+<div class="card-t" style="color:#e3b341">⚠️ Post-Dinner Dessert Timing</div>
+<div class="card-b" style="margin-top:6px">Your pattern: BJJ ~8 PM → shower → dinner ~9 PM → mochi or Asian dessert after. This is likely a major driver of your fasting glucose 103. Mochi and rice-based desserts are high-glycemic carbs hitting at the worst possible time — your insulin sensitivity is lowest at night (circadian rhythm), and there's only 8–9 hours before a morning blood draw. Strategies that don't kill the tradition: (1) Take your dinner berberine 500mg WITH the meal — it'll blunt the glucose spike from dessert too. (2) Smaller portion or lower-glycemic swap (fresh fruit, dark chocolate 85%+). (3) Post-dinner walk even 10 min clears glucose 20–30% faster. (4) If you keep the dessert, try eating it WITH the meal rather than after — fat and protein from dinner slow the carb absorption. Your berberine + post-meal walks + portion awareness may be enough to drop your fasting glucose 5–10 points without cutting dessert entirely.</div>
+</div>
+
+<div class="card" style="background:#1c2128">
+<div class="sr"><span class="sr-l">Total Calories</span><span class="sr-v">~1,815</span></div>
+<div class="sr"><span class="sr-l">Protein</span><span class="sr-v">~192g</span></div>
+<div class="sr"><span class="sr-l">Carbs</span><span class="sr-v">~135g</span></div>
+<div class="sr"><span class="sr-l">Fat</span><span class="sr-v">~66g</span></div>
+<div class="sr"><span class="sr-l">Fiber</span><span class="sr-v">~28g (+5g psyllium = 33g)</span></div>
+</div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- TAB 4: SUPPLEMENTS -->
+<!-- ══════════════════════════════════════════ -->
+<div class="tab" id="tab-supps">
+<div class="tab-title">Supplement Stack</div>
+<p class="tab-sub">Tap any supplement to expand details &bull; Grayed items start in future weeks</p>
+
+<div class="phase-card">
+<div class="phase-week" id="phase-week">Week 1</div>
+<div class="phase-label" id="phase-label">Loading Phase</div>
+<div class="phase-active" id="phase-active">Berberine lunch only · No butyrate yet</div>
+</div>
+
+<div class="toggle-row">
+<div class="toggle-btn active" onclick="setDay('training')">Training Day</div>
+<div class="toggle-btn" onclick="setDay('rest')">Rest / Z2 Day</div>
+</div>
+
+<div id="supp-progress" style="margin-bottom:16px">
+<div style="display:flex;justify-content:space-between;font-size:12px;color:#8b949e"><span>Progress</span><span id="prog-text">0 / 0</span></div>
+<div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<!-- 5:15 AM -->
+<div class="tl-block">
+<div class="tl-time">5:15 AM — Fasted Longevity</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">TRU NIAGEN — 300mg (1 capsule)</div><div class="tl-detail">Nicotinamide Riboside (NR) — on subscription</div><div class="tl-why">Why: NAD+ precursor. NAD+ declines ~50% by age 40. Supports mitochondrial function, DNA repair, sirtuin activation (longevity genes), and cellular energy. NR is the most clinically studied NAD+ precursor (ChromaDex/Dartmouth). 300mg is the standard dose. Take AM — some people report sleep disruption if taken late. Your subscription delivers every 6 months.</div></div>
+</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Green Tea / Matcha — 1 cup</div><div class="tl-detail">Viome SUPERFOOD — replaces coffee</div><div class="tl-why">Why: EGCG supports fat oxidation and insulin sensitivity (your glucose 103 and insulin 6.2 need this). Viome rates it SUPERFOOD. Coffee is both IgG elevated AND Viome MINIMIZE — green tea is the better play. Zero calories — preserves your fast.</div></div>
+</div>
+</div>
+
+<!-- 5:20 AM -->
+<div class="tl-block">
+<div class="tl-time">5:20 AM — Pre-Workout Stack</div>
+
+<div class="tl-item" data-day="training">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">PerfectAmino EAAs — 5 tablets</div><div class="tl-detail">BodyHealth — 6.5g essential aminos</div><div class="tl-why">Why: Fasted training fuel without spiking insulin. EAAs trigger muscle protein synthesis (MPS) without the caloric load of a pre-workout meal. Preserves muscle during your deficit.</div></div>
+</div>
+
+<div class="tl-item" data-day="training">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">L-Citrulline Powder (dose 1) — 4g (1¼ tsp)</div><div class="tl-detail">BulkSupplements 1kg tub — 1 tsp = 3g, so use 1¼ tsp for 4g</div><div class="tl-why">Why: Converts to arginine in kidneys → nitric oxide → blood flow. 8g/day (split) is the clinical dose for endothelial function and exercise performance. Citrulline > arginine because it bypasses first-pass liver metabolism. Also supports sexual performance via NO pathway.</div></div>
+</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Creatine Monohydrate — 3–5g (1 scoop)</div><div class="tl-detail">Thorne NSF Certified for Sport</div><div class="tl-why">Why: Works through saturation — daily, never skip rest days. Increases PCr for strength output + cognitive benefits. Your kidney function (eGFR 91) confirms it's safe. Weeks 1–2: 3g to minimize water retention. Then 5g ongoing. Tell doctor before bloodwork — it raises creatinine readings.</div></div>
+</div>
+
+<div class="tl-item" data-day="training">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Taurine — 2,000mg (2 caps)</div><div class="tl-detail">NOW 1000mg — reduced from 3 caps</div><div class="tl-why">Why: Cell volumization, antioxidant, supports heart and endurance. Reduced from 3g to 2g because taurine is an osmolyte like creatine — both pull water into cells, and the combo was causing your muffin top/distension. 2g is still effective, less water retention.</div></div>
+</div>
+
+<div class="tl-item" data-day="training">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">ALCAR — 1,500mg (2 caps)</div><div class="tl-detail">NaturaLife Labs 750mg</div><div class="tl-why">Why: Shuttles fatty acids into mitochondria for fuel (fat burning). Also crosses blood-brain barrier for cognitive function. Reduced from 3 caps because of gut distension when combined with other fasted powders.</div></div>
+</div>
+</div>
+
+<!-- 7:30 AM -->
+<div class="tl-block">
+<div class="tl-time">7:30 AM — Post-Workout</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Collagen Peptides — 15g (1 scoop)</div><div class="tl-detail">Vital Proteins — moved from 5:15 AM to preserve fast</div><div class="tl-why">Why: Type I/III collagen for tendon/joint healing (bicep + rotator cuff). Post-workout collagen synthesis is elevated for 24 hrs — this timing still works. Moving from 5:15 AM extends your fast to 7:30 AM, which you believe drives many of your optimal levels. Mix in water or shake.</div></div>
+</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Vitamin C — 50mg (1 tab)</div><div class="tl-detail">Any brand — take with collagen</div><div class="tl-why">Why: Required cofactor for collagen synthesis. Low dose intentional — high-dose C can blunt exercise adaptations (Paulsen 2014). 50mg is enough for the collagen pathway.</div></div>
+</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Glycine Powder — 3g (1 scoop) AM DOSE</div><div class="tl-detail">Bulk Supplements — take with collagen + vitamin C</div><div class="tl-why">Why: Glycine is a building block of collagen — taking it WITH your collagen + vitamin C maximizes tendon repair. This is the AM dose; PM dose stays at 9:30 PM for sleep.</div></div>
+</div>
+
+<div class="tl-item" data-day="training">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">NAKED Whey ISO Shake — ~1.5 scoops (45–50g protein) — OPTIONAL</div><div class="tl-detail">NAKED Whey ISO Unflavored (30g/scoop) + water + MCT oil + blueberries — skip if not practical</div><div class="tl-why">Why: Grass-fed whey isolate, only 2 ingredients (WPI + sunflower lecithin). Near-zero lactose (0.1% = 0.03g/scoop — safe for you). 30g protein per scoop so ~1.5 scoops hits your 45–50g MPS target. MCT oil is Viome SUPERFOOD. Blueberries are Viome ENJOY + antioxidant recovery. No milk — water only. If you skip the shake, collagen (15g) still gives you amino acids for recovery — just lower leucine.</div></div>
+</div>
+
+<div class="tl-item" data-day="training">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">L-Citrulline Powder (dose 2) — 4g (1¼ tsp)</div><div class="tl-detail">Mix into shake or water — 1¼ tsp = 4g</div><div class="tl-why">Why: Second half of your 8g daily dose. Post-workout NO boost supports recovery blood flow. Split dosing avoids the gut discomfort you get from 8g at once.</div></div>
+</div>
+
+<div class="tl-item" data-day="both" data-ramp="3" data-ramp-id="psyllium">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Psyllium Husk — <span id="psyllium-dose">5g</span> (1 tbsp) DAILY</div><div class="tl-detail">NOW Foods Psyllium Husk Powder 24oz — start 2.5g week 3, full 5g week 4</div><div class="tl-why">Why: Soluble fiber binds bile acids → liver pulls LDL-C from blood to make more bile → lowers LDL particle count. Directly addresses your LDL-P 1413 and LDL Small 251. Meta-analysis shows 5–10g/day reduces LDL-C 5–10%. Must be DAILY for cumulative effect — LDL reduction requires consistent dosing. Mix in water or shake. Take with plenty of water. Start: Week 3 at 2.5g, Week 4 at 5g (GI ramp).</div></div>
+</div>
+</div>
+
+<!-- 12:00 PM -->
+<div class="tl-block">
+<div class="tl-time">12:00 PM — Lunch Stack</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Viome Precision Supplements — 1 pack</div><div class="tl-detail">Viome personalized</div><div class="tl-why">Why: Microbiome-specific nutrients based on your Viome test. Includes prebiotics, vitamins, minerals, and botanicals calibrated to your gut flora. Non-negotiable — this is your personalized foundation.</div></div>
+</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Viome Probiotics — 1 pack</div><div class="tl-detail">Viome personalized</div><div class="tl-why">Why: Strain-specific probiotics matched to your microbiome. Supports gut barrier integrity — critical given your elevated IgG food sensitivities (casein, wheat, corn). A leaky gut amplifies food reactions.</div></div>
+</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Tongkat Ali — 200mg (2 caps)</div><div class="tl-detail">Nootropics Depot 10% eurycomanone</div><div class="tl-why">Why: Supports testosterone via HPG axis stimulation without being a hormone. Your T is 729 — tongkat is likely contributing. Continuous dosing, no cycling needed (9-month human trial, no tolerance). Dose reduced from 4 caps (was double the studied dose and wasting money).</div></div>
+</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Boron — 6mg (2 caps)</div><div class="tl-detail">NOW 3mg caps</div><div class="tl-why">Why: Reduces SHBG (yours is 49, upper end) → frees up more testosterone. Also supports vitamin D metabolism (relevant: your D is suboptimal at 37). 6mg is the clinical dose from the Naghii 2011 study.</div></div>
+</div>
+
+<div class="tl-item" data-day="both" data-ramp-d3="true">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Vitamin D3 — <span id="d3-dose">10,000 IU (2 softgels)</span></div><div class="tl-detail">NOW High Potency 5,000 IU softgels</div><div class="tl-why">Why: At 189 lbs with ~21.6% body fat, fat tissue sequesters D3 — you need a higher dose than a leaner person to reach the same blood level. 4,000 IU only got you to 37. Loading at 10,000 IU (2 softgels) for 12 weeks targets 50–60 ng/mL, then maintain at 5,000 IU (1 softgel). Take with fattiest meal — fat-soluble. Retest at 90 days. Discuss with your doctor. Start: Week 1.</div></div>
+</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Vitamin K2 MK-7 — 200mcg (2 softgels)</div><div class="tl-detail">NOW 100mcg softgels — adjust count if your caps are a different strength</div><div class="tl-why">Why: Directs calcium to bones (not arteries) — especially important when increasing D3. Also prevents arterial calcification, relevant given your LDL particle burden. Must pair with D3. Increased to 200mcg to match the higher D3 dose.</div></div>
+</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Alpha Lipoic Acid — 600mg (1 cap)</div><div class="tl-detail">Nutricost 600mg</div><div class="tl-why">Why: Universal antioxidant (works in fat AND water-soluble environments). Improves insulin sensitivity — directly relevant to your fasting glucose 103 and insulin 6.2. Also supports heavy metal detox (your mercury is detectable at 6 mcg/L). 600mg is the clinical dose for glucose management.</div></div>
+</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Nordic Naturals Ultimate Omega — 2 soft gels</div><div class="tl-detail">Nordic Naturals — 1,280mg omega-3 (dose 1 of 2)</div><div class="tl-why">Why: Doubling omega-3 to shift LDL particles from small/dense to large/buoyant. Product recommends 2 softgels twice daily for higher-intensity support. Take with lunch fat for absorption.</div></div>
+</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Berberine HCl — 500mg (1 cap)</div><div class="tl-detail">Integrative Therapeutics Berberine 1500mg (2-pack) — dose 1 of 2</div><div class="tl-why">Why: Natural AMPK activator from plant alkaloids. Lowers fasting glucose, improves insulin sensitivity, reduces LDL-C. Directly targets your glucose 103, insulin 6.2, and LDL-P 1413. Must be straight berberine HCl at 500mg — your IT Berberine Complex is a different product with much lower berberine content (finish that bottle for gut support, then switch to this). Take with food. ⚠️ GI CAVEAT: Can cause loose stools weeks 1–2 as it shifts gut flora. Start: WEEK 1 — lunch only. Add dinner dose WEEK 3.</div></div>
+</div>
+
+<div class="tl-item" data-day="both" data-ramp="2" data-ramp-id="butyrate-lunch">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">BodyBio Butyrate Cal/Mag — 2 caps</div><div class="tl-detail">BodyBio — postbiotic (dose 1 of 2) · <em>Added Week 2</em></div><div class="tl-why">Why: Butyric acid feeds colonocytes (colon lining cells), repairs gut barrier ("leaky gut"), reduces gut inflammation. Directly relevant to your elevated IgG food sensitivities (casein 7.4, wheat, corn, peanut) and GI symptoms. Complements berberine — berberine shifts flora, butyrate feeds the lining. ⚠️ TRANSPARENCY: Standalone tributyrin was on your earlier CUT LIST as "gut overkill" — but your Function Health now shows clinical gut inflammation (IgG hyperreactivity across 7 foods) that wasn't documented before. Different form from Viome tributyrin (119mg), acts in colon not small intestine. Start: WEEK 2 — lunch only. Add dinner dose WEEK 3.</div></div>
+</div>
+</div>
+
+<!-- 7:00 PM -->
+<div class="tl-block">
+<div class="tl-time">7:00 PM — Dinner Stack</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Ashwagandha KSM-66 — 1,000mg (2 caps)</div><div class="tl-detail">Youtheory 1,000mg (600mg KSM-66 + 400mg root powder per 2-cap serving)</div><div class="tl-why">Why: Adaptogen that lowers cortisol (yours is fine at 9.9 but sustained training + BJJ = high demand). Also supports testosterone, sleep quality, and reduces exercise-induced muscle damage. KSM-66 is the most studied extract. Take PM — it has mild sedative properties.</div></div>
+</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Nordic Naturals Ultimate Omega — 2 soft gels</div><div class="tl-detail">Nordic Naturals — 1,280mg omega-3 (dose 2 of 2, lemon 180ct)</div><div class="tl-why">Why: Second dose. 4 softgels/day = 2,560mg omega-3, product's recommended high-intensity dose. Shifts LDL particles from small/dense to large/buoyant — directly targeting your atherogenic pattern. Also anti-inflammatory (keeps hs-CRP at 0.2). Take with dinner fat for absorption.</div></div>
+</div>
+
+<div class="tl-item" data-day="both" data-ramp="3" data-ramp-id="berberine-dinner">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Berberine HCl — 500mg (1 cap)</div><div class="tl-detail">Integrative Therapeutics 500mg HCl (dose 2 of 2) · <em>Added Week 3</em></div><div class="tl-why">Why: Second dose. Berberine has a short half-life (~5 hrs) so splitting across meals maintains steady blood levels. 1,000mg/day total (500mg × 2) is the clinical dose for glucose and lipid support.</div></div>
+</div>
+
+<div class="tl-item" data-day="both" data-ramp="3" data-ramp-id="butyrate-dinner">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">BodyBio Butyrate Cal/Mag — 2 caps</div><div class="tl-detail">BodyBio (dose 2 of 2) · <em>Added Week 3</em></div><div class="tl-why">Why: Second dose with dinner. Butyrate works locally in the colon — splitting doses ensures sustained gut lining support throughout the day.</div></div>
+</div>
+</div>
+
+<!-- 9:30 PM -->
+<div class="tl-block">
+<div class="tl-time">9:30 PM — Sleep Stack</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Magnesium Glycinate — 400mg (2 caps)</div><div class="tl-detail">NOW 200mg caps</div><div class="tl-why">Why: Glycinate form for sleep + relaxation (doesn't cause GI issues like citrate). Your RBC magnesium is at the top of range — this is maintaining it, not building it. Also supports 300+ enzymatic reactions including glucose metabolism. The glycinate bond provides ~1g glycine as a bonus.</div></div>
+</div>
+
+<div class="tl-item" data-day="both">
+<div class="tl-check" onclick="toggleCheck(this)"></div>
+<div class="tl-info"><div class="tl-name">Glycine Powder — 3g (1 scoop)</div><div class="tl-detail">Bulk Supplements — PM dose only</div><div class="tl-why">Why: Improves deep sleep (Bannai 2012), supports collagen synthesis overnight (your tendons heal while sleeping), and acts as inhibitory neurotransmitter. Combined with magnesium glycinate = ~4g total glycine at bedtime. Bedtime only per your preference.</div></div>
+</div>
+</div>
+
+<div class="card" style="background:#1c2128;margin-top:16px" id="totals-card">
+<!-- JS-generated dynamic totals based on protocol week -->
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- TAB 5: PLAN -->
+<!-- ══════════════════════════════════════════ -->
+<div class="tab" id="tab-plan">
+<div class="tab-title">90-Day Plan</div>
+<p class="tab-sub">Retest targets &bull; Doctor visits &bull; Milestones</p>
+
+<div class="sec">
+<div class="sec-h"><span class="badge br">Week 1–2</span><h2>Immediate</h2></div>
+<div class="card">
+<div class="card-b">
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Schedule PCP appointment — bring this report</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Schedule allergist — shrimp IgE confirmation</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Start 4-week elimination: dairy, wheat, corn, peanuts</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Switch coffee → green tea / matcha</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Glycine AM dose (3g with collagen at 7:30 AM post-workout)</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Increase Vitamin D3 to 10,000 IU / 2 softgels (12-week loading dose)</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Increase K2 MK-7 to 200mcg</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Start creatine ramp at 3g/day</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Start post-meal walks (10–15 min after dinner)</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span><strong>START: Berberine 1 cap (500mg) at LUNCH ONLY</strong> (GI ramp)</span></div>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><span class="badge by">Week 2</span><h2>Add Butyrate</h2></div>
+<div class="card">
+<div class="card-b">
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>If berberine OK → <strong>ADD: Butyrate 2 caps at LUNCH ONLY</strong></span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>If GI issues → stay at lunch-only berberine, delay butyrate to week 3</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Track GI symptoms daily (bloating, stool quality, cramping)</span></div>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><span class="badge by">Week 3–4</span><h2>Full Doses + Psyllium</h2></div>
+<div class="card">
+<div class="card-b">
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span><strong>ADD: Berberine dinner dose</strong> (1 cap lunch + 1 cap dinner = 1,000mg/day)</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span><strong>ADD: Butyrate dinner dose</strong> (2 caps lunch + 2 caps dinner = 4 caps/day)</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span><strong>START: Psyllium 2.5g/day</strong> (in water or shake — with plenty of water)</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Creatine → increase to 5g/day</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Week 4: Increase psyllium to 5g/day if no bloating</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Schedule PCP: discuss ferritin 432, LDL particles, natural approach</span></div>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><span class="badge by">Week 5–8</span><h2>Lock In + Doctor Visits</h2></div>
+<div class="card">
+<div class="card-b">
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>PCP visit: bring this report, discuss ferritin, LDL particles, natural plan</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Get liver ultrasound (rule out NAFLD)</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Consider blood donation (lower ferritin)</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Consider 2-week CGM trial (see glucose patterns)</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Begin reintroducing eliminated foods one at a time (every 3 days)</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Track body weight weekly (target: 1 lb/week = ~8 lbs by week 8)</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Z2 cardio: verify hitting 150+ min/week</span></div>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><span class="badge bg">Week 7–12</span><h2>Lock In</h2></div>
+<div class="card">
+<div class="card-b">
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Track body weight (target: 10–12 lbs down from start)</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Review food elimination results — which foods trigger symptoms?</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Reassess tendon rehab progress — ready for heavier loading?</span></div>
+<div class="plan-row"><div class="tl-check" onclick="togglePlan(this)"></div><span>Book Function Health Mid-Year Test (60+ biomarkers)</span></div>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sec-h"><h2>Retest Targets (90 days)</h2></div>
+<div class="card">
+<div class="sr"><span class="sr-l">Ferritin</span><span class="sr-v" style="color:#3fb950">432 → <300 ng/mL</span></div>
+<div class="sr"><span class="sr-l">Fasting Glucose</span><span class="sr-v" style="color:#3fb950">103 → <95 mg/dL</span></div>
+<div class="sr"><span class="sr-l">Fasting Insulin</span><span class="sr-v" style="color:#3fb950">6.2 → <5.0 uIU/mL</span></div>
+<div class="sr"><span class="sr-l">Vitamin D</span><span class="sr-v" style="color:#3fb950">37 → 50–60 ng/mL</span></div>
+<div class="sr"><span class="sr-l">LDL-P</span><span class="sr-v" style="color:#3fb950">1413 → <1000 nmol/L</span></div>
+<div class="sr"><span class="sr-l">Body Fat %</span><span class="sr-v" style="color:#3fb950">21.6% → 18% (target ~180 lbs preserving muscle)</span></div>
+<div class="sr"><span class="sr-l">Uric Acid</span><span class="sr-v" style="color:#3fb950">7.6 → <6.5 mg/dL</span></div>
+</div>
+
+<div class="card" style="border-left:3px solid #238636">
+<div class="card-b"><strong style="color:#3fb950">The thesis:</strong> Reducing visceral fat (target: 21.6% → 18% body fat, ~180 lbs while preserving lean mass) should improve your fasting glucose, insulin, ferritin, uric acid, AND LDL particles — they're all driven by the same root cause (visceral fat driving insulin resistance). Your A1c is 5.1%, inflammation is 0.2, testosterone is 729 — the athletic foundation is strong. You have an athletic build with significant muscle mass; the goal is targeted visceral fat loss, not generic weight loss. Diet + training + berberine + psyllium + no late-night sweets + time.</div>
+</div>
+
+<div class="sec" style="margin-top:24px">
+<div class="sec-h"><span class="badge bb">Cart</span><h2>Amazon Shopping List — Confirmed</h2></div>
+<div class="card" style="border-left:3px solid #238636">
+<div class="card-t" style="color:#3fb950">In Cart — Ready to Buy</div>
+<div class="sr"><span class="sr-l">IT Berberine 1500mg (Pack of 2)</span><span class="sr-v">$63.00 — 120 caps, 60-day supply at 2 caps/day</span></div>
+<div class="sr"><span class="sr-l">NOW Psyllium Husk Powder 24oz</span><span class="sr-v">$21.31 — ~4.5 month supply at 5g/day</span></div>
+<div class="sr" style="border-bottom:none;font-weight:700;margin-top:6px"><span class="sr-l">Cart Total</span><span class="sr-v" style="color:#3fb950">$84.31</span></div>
+</div>
+<div class="card">
+<div class="card-t">Already Own — No Purchase Needed</div>
+<div class="sr"><span class="sr-l">TRU NIAGEN 300mg NR</span><span class="sr-v">On subscription (next delivery Dec 2026)</span></div>
+<div class="sr"><span class="sr-l">IT Berberine Complex (full bottle)</span><span class="sr-v">Finish for gut support, then don't rebuy</span></div>
+<div class="sr"><span class="sr-l">BodyBio Butyrate Cal/Mag (full bottle)</span><span class="sr-v">Start Week 2 of stagger plan</span></div>
+<div class="sr"><span class="sr-l">All other supplements</span><span class="sr-v">Already in current stack</span></div>
+</div>
+</div>
+</div>
+</div>
+
+</div><!-- /app -->
+
+<!-- ── NAVIGATION ── -->
+<nav class="nav">
+<button class="nav-btn active" onclick="showTab('summary')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+Today
+</button>
+<button class="nav-btn" onclick="showTab('dash')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+Labs
+</button>
+<button class="nav-btn" onclick="showTab('exercise')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5L17.5 17.5M6.5 17.5L17.5 6.5"/><circle cx="12" cy="12" r="9"/></svg>
+Exercise
+</button>
+<button class="nav-btn" onclick="showTab('diet')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
+Diet
+</button>
+<button class="nav-btn" onclick="showTab('supps')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6v2H9zM12 8v8M8 12h8"/><rect x="5" y="5" width="14" height="16" rx="2"/></svg>
+Stack
+</button>
+<button class="nav-btn" onclick="showTab('plan')">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+Plan
+</button>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ── Supabase cloud sync ── */
+const SUPA_URL = 'https://oemhujrfmjtpwxsmlwlc.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lbWh1anJmbWp0cHd4c21sd2xjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY3NzY3OTcsImV4cCI6MjEwMjM1Mjc5N30.pe8NbdZc05Z4tZ34SvaTNxr6nPxh9Y_tClbrsZjD43U';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+async function cloudSave(key, value) {
+  try {
+    await sb.from('protocol_kv').upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+  } catch(e) { console.warn('Cloud save failed:', e); }
+}
+async function cloudLoad(key) {
+  try {
+    const { data } = await sb.from('protocol_kv').select('value').eq('key', key).single();
+    return data ? data.value : null;
+  } catch(e) { return null; }
+}
+
+let currentDay = 'training';
+let today = new Date().toISOString().slice(0,10);
+let SK = 'protocol-' + today;
+const SK_PLAN = 'protocol-plan';
+const SK_STREAK = 'protocol-streak';
+const PROTO_START = '2026-08-14';
+
+function getToday() { return new Date().toISOString().slice(0,10); }
+
+function getProtoWeek() {
+  const start = new Date(PROTO_START + 'T00:00:00');
+  const now = new Date(getToday() + 'T00:00:00');
+  return Math.max(1, Math.ceil((now - start + 86400000) / 604800000));
+}
+let protoWeek = getProtoWeek();
+
+/* ── Day-rollover detection ── */
+function checkDayRollover() {
+  const now = getToday();
+  if (now !== today) {
+    // Save final state for the old day before switching
+    saveState();
+    // Update to new day
+    today = now;
+    SK = 'protocol-' + today;
+    protoWeek = getProtoWeek();
+    // Uncheck all supplement & exercise boxes for the fresh day
+    document.querySelectorAll('#tab-supps .tl-check, #tab-exercise .tl-check').forEach(el => el.classList.remove('checked'));
+    // Reset day toggle to training (default for new day)
+    currentDay = 'training';
+    // Load any existing state for the new day (in case they already checked items today)
+    loadState();
+    applyRamp();
+    updateAll();
+  }
+}
+// Check every 30 seconds + on tab focus
+setInterval(checkDayRollover, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkDayRollover(); });
+
+/* ── Lab History toggle ── */
+function showLabPanel(panel) {
+  document.querySelectorAll('.lh-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.lh-toggle-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('lh-' + panel).classList.add('active');
+  event.target.classList.add('active');
+}
+function showLabDate(sel) {
+  document.querySelectorAll('#lh-history .lh-date-chip').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  const trends = document.getElementById('lh-trends');
+  const allergies = document.getElementById('lh-allergies');
+  if (!trends) return;
+  // Show/hide rows based on selection
+  trends.querySelectorAll('.lh-row').forEach(r => {
+    const vals = r.querySelectorAll('.lh-val');
+    if (sel === 'all') { r.style.display = ''; return; }
+    if (sel === 'jul14') { r.style.display = (vals[0] && vals[0].textContent.trim() !== '—') ? '' : 'none'; return; }
+    if (sel === 'jul31') { r.style.display = (vals[1] && vals[1].textContent.trim() !== '—') ? '' : 'none'; return; }
+    if (sel === 'aug3') { r.style.display = 'none'; }
+  });
+  if (allergies) allergies.style.display = (sel === 'aug3' || sel === 'all') ? '' : 'none';
+  if (trends) trends.style.display = (sel === 'aug3') ? 'none' : '';
+}
+
+function showTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function setDay(day) {
+  currentDay = day;
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.querySelectorAll('#tab-supps .tl-item').forEach(item => {
+    const d = item.dataset.day;
+    if (d === 'both' || d === day) {
+      item.style.display = 'flex';
+      item.querySelector('.tl-name')?.classList.remove('tl-skip');
+    } else {
+      item.style.display = 'flex';
+      item.querySelector('.tl-name')?.classList.add('tl-skip');
+    }
+  });
+  saveState();
+  applyRamp();
+  updateAll();
+}
+
+// ── SAVE / LOAD (localStorage + Supabase cloud) ──
+function saveState() {
+  const state = { day: currentDay, supps: [], exercise: [], plan: [] };
+  document.querySelectorAll('#tab-supps .tl-check').forEach((el, i) => {
+    state.supps[i] = el.classList.contains('checked');
+  });
+  document.querySelectorAll('#tab-exercise .tl-check').forEach((el, i) => {
+    state.exercise[i] = el.classList.contains('checked');
+  });
+  state.summary = {
+    suppPct: getSuppCompletion().pct,
+    exPct: getExCompletion().pct,
+    planPct: getPlanCompletion().pct
+  };
+  localStorage.setItem(SK, JSON.stringify(state));
+  cloudSave(SK, state);   // async cloud push
+
+  const plan = [];
+  document.querySelectorAll('#tab-plan .tl-check').forEach((el, i) => {
+    plan[i] = el.classList.contains('checked');
+  });
+  localStorage.setItem(SK_PLAN, JSON.stringify(plan));
+  cloudSave(SK_PLAN, plan);
+
+  const streak = JSON.parse(localStorage.getItem(SK_STREAK) || '{}');
+  const sc = getSuppCompletion();
+  if (sc.pct >= 80) streak[today] = true;
+  localStorage.setItem(SK_STREAK, JSON.stringify(streak));
+  cloudSave(SK_STREAK, streak);
+}
+
+function applyState(s, planArr) {
+  if (s) {
+    if (s.day) { currentDay = s.day; }
+    if (s.supps) document.querySelectorAll('#tab-supps .tl-check').forEach((el, i) => { if (s.supps[i]) el.classList.add('checked'); });
+    if (s.exercise) document.querySelectorAll('#tab-exercise .tl-check').forEach((el, i) => { if (s.exercise[i]) el.classList.add('checked'); });
+  }
+  if (planArr) {
+    document.querySelectorAll('#tab-plan .tl-check').forEach((el, i) => {
+      if (planArr[i]) { el.classList.add('checked'); el.closest('.plan-row')?.classList.add('done'); }
+    });
+  }
+  document.querySelectorAll('.toggle-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim().toLowerCase().replace(' day','') === currentDay);
+  });
+}
+
+function loadState() {
+  // Try localStorage first (instant)
+  const raw = localStorage.getItem(SK);
+  const planRaw = localStorage.getItem(SK_PLAN);
+  applyState(raw ? JSON.parse(raw) : null, planRaw ? JSON.parse(planRaw) : null);
+}
+
+// Cloud sync on load — overwrites localStorage if cloud has newer data
+async function cloudSync() {
+  const [cState, cPlan, cStreak] = await Promise.all([
+    cloudLoad(SK), cloudLoad(SK_PLAN), cloudLoad(SK_STREAK)
+  ]);
+  if (cState || cPlan) {
+    // Clear existing checks first
+    document.querySelectorAll('#tab-supps .tl-check, #tab-exercise .tl-check').forEach(el => el.classList.remove('checked'));
+    document.querySelectorAll('#tab-plan .tl-check').forEach(el => { el.classList.remove('checked'); el.closest('.plan-row')?.classList.remove('done'); });
+    applyState(cState, cPlan);
+    if (cState) localStorage.setItem(SK, JSON.stringify(cState));
+    if (cPlan) localStorage.setItem(SK_PLAN, JSON.stringify(cPlan));
+    if (cStreak) localStorage.setItem(SK_STREAK, JSON.stringify(cStreak));
+    updateAll();
+  }
+}
+
+// ── TOGGLE ──
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  saveState();
+  updateAll();
+}
+function togglePlan(el) {
+  el.classList.toggle('checked');
+  el.closest('.plan-row')?.classList.toggle('done');
+  saveState();
+  updateAll();
+}
+
+// ── PROGRESS CALCULATIONS ──
+function getSuppCompletion() {
+  let total = 0, checked = 0;
+  document.querySelectorAll('#tab-supps .tl-item').forEach(item => {
+    const d = item.dataset.day;
+    if (d === 'both' || d === currentDay) {
+      total++;
+      if (item.querySelector('.tl-check.checked')) checked++;
+    }
+  });
+  return { total, checked, pct: total > 0 ? Math.round(checked / total * 100) : 0 };
+}
+function getExCompletion() {
+  const checks = document.querySelectorAll('#tab-exercise .tl-check');
+  let total = checks.length, checked = 0;
+  checks.forEach(el => { if (el.classList.contains('checked')) checked++; });
+  return { total, checked, pct: total > 0 ? Math.round(checked / total * 100) : 0 };
+}
+function getPlanCompletion() {
+  const checks = document.querySelectorAll('#tab-plan .tl-check');
+  let total = checks.length, checked = 0;
+  checks.forEach(el => { if (el.classList.contains('checked')) checked++; });
+  return { total, checked, pct: total > 0 ? Math.round(checked / total * 100) : 0 };
+}
+
+// ── DIALS ──
+function updateDial(arcId, pctId, countId, data, color) {
+  const arc = document.getElementById(arcId);
+  const pctEl = document.getElementById(pctId);
+  const countEl = document.getElementById(countId);
+  if (!arc) return;
+  const circ = 172.8; // semicircle circumference for r=55
+  const offset = circ * (1 - data.pct / 100);
+  arc.style.strokeDashoffset = offset;
+  pctEl.textContent = data.pct + '%';
+  countEl.textContent = data.checked + '/' + data.total;
+}
+
+// ── STREAK ──
+function renderStreak() {
+  const row = document.getElementById('streak-row');
+  if (!row) return;
+  const streak = JSON.parse(localStorage.getItem(SK_STREAK) || '{}');
+  const days = ['S','M','T','W','T','F','S'];
+  const todayDate = new Date(today + 'T12:00:00');
+  const dow = todayDate.getDay();
+  row.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(todayDate);
+    d.setDate(d.getDate() - dow + i);
+    const key = d.toISOString().slice(0,10);
+    const dot = document.createElement('div');
+    dot.className = 'streak-dot' + (streak[key] ? ' done' : '') + (key === today ? ' today' : '');
+    dot.textContent = days[i];
+    row.appendChild(dot);
+  }
+}
+
+// ── UPDATE ALL ──
+function updateAll() {
+  // Stack progress bar
+  const sc = getSuppCompletion();
+  const progText = document.getElementById('prog-text');
+  const progFill = document.getElementById('prog-fill');
+  if (progText) progText.textContent = sc.checked + ' / ' + sc.total;
+  if (progFill) progFill.style.width = sc.pct + '%';
+  // Summary dials
+  updateDial('supp-arc','supp-pct','supp-count', sc);
+  updateDial('ex-arc','ex-pct','ex-count', getExCompletion());
+  updateDial('plan-arc','plan-pct','plan-count', getPlanCompletion());
+  // Quick stats
+  const dayEl = document.getElementById('sum-daytype');
+  const pillEl = document.getElementById('sum-pills');
+  if (dayEl) dayEl.textContent = currentDay === 'training' ? 'Training' : 'Rest / Z2';
+  if (pillEl) pillEl.textContent = currentDay === 'training' ? '34 (loading) / 33 (maint.)' : '25';
+  // Protocol day
+  const pdEl = document.getElementById('sum-protday');
+  if (pdEl) {
+    const start = new Date(PROTO_START + 'T00:00:00');
+    const now = new Date(today + 'T00:00:00');
+    const diff = Math.floor((now - start) / 86400000) + 1;
+    pdEl.textContent = diff > 0 ? 'Day ' + diff + ' of 90' : 'Starting soon';
+  }
+  renderStreak();
+  renderCal();
+  updateAverages();
+}
+
+// ── CALENDAR ──
+let calYear, calMonth;
+(function initCal() {
+  const d = new Date(today + 'T12:00:00');
+  calYear = d.getFullYear();
+  calMonth = d.getMonth();
+})();
+
+function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCal(); }
+function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCal(); }
+
+function getDaySummary(dateStr) {
+  const raw = localStorage.getItem('protocol-' + dateStr);
+  if (!raw) return null;
+  const s = JSON.parse(raw);
+  if (s.summary) return s.summary;
+  // Compute from checkbox data if summary wasn't stored
+  const sc = s.supps ? s.supps.filter(Boolean).length : 0;
+  const st = s.supps ? s.supps.length : 0;
+  const ec = s.exercise ? s.exercise.filter(Boolean).length : 0;
+  const et = s.exercise ? s.exercise.length : 0;
+  return {
+    suppPct: st > 0 ? Math.round(sc/st*100) : 0,
+    exPct: et > 0 ? Math.round(ec/et*100) : 0,
+    planPct: 0
+  };
+}
+
+function renderCal() {
+  const grid = document.getElementById('cal-grid');
+  const label = document.getElementById('cal-month-label');
+  if (!grid) return;
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  label.textContent = months[calMonth] + ' ' + calYear;
+  grid.innerHTML = '';
+  const first = new Date(calYear, calMonth, 1);
+  const startDay = first.getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  // Empty cells before first day
+  for (let i = 0; i < startDay; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-day empty';
+    grid.appendChild(cell);
+  }
+  // Day cells
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const cell = document.createElement('div');
+    const summary = getDaySummary(dateStr);
+    let cls = 'cal-day';
+    if (!summary) {
+      cls += ' no-data';
+    } else {
+      const avg = Math.round((summary.suppPct + summary.exPct) / 2);
+      if (avg >= 90) cls += ' perfect';
+      else if (avg >= 60) cls += ' high';
+      else if (avg >= 30) cls += ' mid';
+      else cls += ' low';
+    }
+    if (dateStr === today) cls += ' today-ring';
+    cell.className = cls;
+    cell.textContent = d;
+    cell.onclick = () => showDayDetail(dateStr, d);
+    grid.appendChild(cell);
+  }
+}
+
+function showDayDetail(dateStr, dayNum) {
+  const detail = document.getElementById('cal-detail');
+  const dateLabel = document.getElementById('cal-detail-date');
+  if (!detail) return;
+  // Deselect previous
+  document.querySelectorAll('.cal-day.selected').forEach(c => c.classList.remove('selected'));
+  // Select this one
+  const cells = document.querySelectorAll('.cal-day:not(.empty)');
+  cells.forEach(c => { if (c.textContent == dayNum) c.classList.add('selected'); });
+
+  const summary = getDaySummary(dateStr);
+  const d = new Date(dateStr + 'T12:00:00');
+  dateLabel.textContent = d.toLocaleDateString('en-US', {weekday:'long', month:'short', day:'numeric'});
+
+  if (!summary) {
+    document.getElementById('cd-supp').textContent = 'No data';
+    document.getElementById('cd-ex').textContent = 'No data';
+    document.getElementById('cd-plan').textContent = 'No data';
+    document.getElementById('cd-supp-bar').style.width = '0';
+    document.getElementById('cd-ex-bar').style.width = '0';
+    document.getElementById('cd-plan-bar').style.width = '0';
+  } else {
+    document.getElementById('cd-supp').textContent = summary.suppPct + '%';
+    document.getElementById('cd-ex').textContent = summary.exPct + '%';
+    document.getElementById('cd-plan').textContent = (summary.planPct || 0) + '%';
+    document.getElementById('cd-supp-bar').style.width = summary.suppPct + '%';
+    document.getElementById('cd-ex-bar').style.width = summary.exPct + '%';
+    document.getElementById('cd-plan-bar').style.width = (summary.planPct || 0) + '%';
+  }
+  detail.classList.add('show');
+}
+
+// ── ROLLING AVERAGES ──
+function updateAverages() {
+  const ranges = [
+    { id: 'avg-week', days: 7 },
+    { id: 'avg-month', days: 30 },
+    { id: 'avg-quarter', days: 90 },
+    { id: 'avg-year', days: 365 }
+  ];
+  ranges.forEach(r => {
+    let sum = 0, count = 0;
+    for (let i = 0; i < r.days; i++) {
+      const d = new Date(today + 'T12:00:00');
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0,10);
+      const s = getDaySummary(key);
+      if (s) {
+        sum += Math.round((s.suppPct + s.exPct) / 2);
+        count++;
+      }
+    }
+    const el = document.getElementById(r.id);
+    if (el) el.textContent = count > 0 ? Math.round(sum / count) + '%' : '—';
+  });
+}
+
+// ── RAMP LOGIC ──
+function applyRamp() {
+  const w = protoWeek;
+  // Phase card
+  const pw = document.getElementById('phase-week');
+  const pl = document.getElementById('phase-label');
+  const pa = document.getElementById('phase-active');
+  if (pw) pw.textContent = 'Week ' + w;
+  if (pl) {
+    if (w <= 2) pl.textContent = 'GI Ramp Phase';
+    else if (w <= 4) pl.textContent = 'Building to Full Dose';
+    else if (w <= 12) pl.textContent = 'Full Protocol — D3 Loading';
+    else pl.textContent = 'Maintenance Phase';
+  }
+  if (pa) {
+    const parts = [];
+    if (w >= 1) parts.push('Berberine lunch');
+    if (w >= 2) parts.push('Butyrate lunch');
+    if (w >= 3) parts.push('Dinner doses · Psyllium');
+    if (w >= 4) parts.push('Full psyllium 5g');
+    if (w >= 13) parts.push('D3 maintenance');
+    pa.textContent = parts.join(' · ');
+  }
+  // Show/hide ramped items
+  document.querySelectorAll('[data-ramp]').forEach(item => {
+    const rampWeek = parseInt(item.dataset.ramp);
+    if (w < rampWeek) {
+      item.classList.add('tl-ramp');
+      const name = item.querySelector('.tl-name');
+      if (name && !name.querySelector('.ramp-badge')) {
+        const badge = document.createElement('span');
+        badge.className = 'ramp-badge inactive';
+        badge.textContent = 'Week ' + rampWeek;
+        name.appendChild(badge);
+      }
+    } else {
+      item.classList.remove('tl-ramp');
+    }
+  });
+  // D3 dose adjustment
+  const d3dose = document.getElementById('d3-dose');
+  if (d3dose) {
+    d3dose.textContent = w <= 12 ? '10,000 IU (2 softgels)' : '5,000 IU (1 softgel)';
+  }
+  // Psyllium dose
+  const psyDose = document.getElementById('psyllium-dose');
+  if (psyDose && w >= 3) {
+    psyDose.textContent = w < 4 ? '2.5g' : '5g';
+  }
+  // Dynamic pill counts
+  updateDynamicTotals();
+}
+
+function updateDynamicTotals() {
+  const w = protoWeek;
+  let lunch = 10; // Tongkat 2 + Boron 2 + K2 2 + ALA 1 + Omega 2 + base berberine 1
+  lunch += (w <= 12 ? 2 : 1); // D3 loading vs maintenance
+  if (w >= 2) lunch += 2; // butyrate lunch
+  let dinner = 4; // Ashwagandha 2 + Omega 2
+  if (w >= 3) dinner += 1; // berberine dinner
+  if (w >= 3) dinner += 2; // butyrate dinner
+  const training = 1 + 9 + 1 + lunch + dinner + 2; // 5:15 + 5:20 + 7:30 + lunch + dinner + 9:30
+  const rest = training - 9; // skip EAA/taurine/ALCAR
+  const el = document.getElementById('totals-card');
+  if (el) {
+    el.innerHTML = '<div style="font-size:12px;color:#8b949e;font-weight:600;margin-bottom:6px">DAILY TOTALS — Week ' + w + (currentDay === 'training' ? ' (Training)' : ' (Rest)') + ':</div>' +
+      '<div class="sr"><span class="sr-l">5:15 AM</span><span class="sr-v">1 cap</span></div>' +
+      (currentDay === 'training' ? '<div class="sr"><span class="sr-l">5:20 AM</span><span class="sr-v">9 pills</span></div>' : '') +
+      '<div class="sr"><span class="sr-l">7:30 AM</span><span class="sr-v">1 tab</span></div>' +
+      '<div class="sr"><span class="sr-l">12:00 PM</span><span class="sr-v">' + lunch + ' caps</span></div>' +
+      '<div class="sr"><span class="sr-l">7:00 PM</span><span class="sr-v">' + dinner + ' caps</span></div>' +
+      '<div class="sr"><span class="sr-l">9:30 PM</span><span class="sr-v">2 caps</span></div>' +
+      '<div class="sr" style="font-weight:700;margin-top:6px"><span class="sr-l">Total pills</span><span class="sr-v">' + (currentDay === 'training' ? training : rest) + '</span></div>';
+  }
+  // Update summary tab too
+  const pillEl = document.getElementById('sum-pills');
+  if (pillEl) pillEl.textContent = currentDay === 'training' ? training : rest;
+}
+
+// ── TWISTY (event delegation) ──
+document.addEventListener('click', function(e) {
+  const info = e.target.closest('.tl-info');
+  if (!info) return;
+  // Don't toggle if clicking the checkbox
+  if (e.target.closest('.tl-check')) return;
+  const item = info.closest('.tl-item');
+  if (item && info.querySelector('.tl-why')) {
+    item.classList.toggle('expanded');
+  }
+});
+
+// ── INIT ──
+(function() {
+  const dateEl = document.getElementById('summary-date');
+  if (dateEl) {
+    const d = new Date(today + 'T12:00:00');
+    dateEl.textContent = d.toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
+  }
+  loadState();     // instant from localStorage
+  applyRamp();
+  updateAll();
+  cloudSync();     // async cloud pull — overwrites if cloud has data
+})();
+</script>
+
+<div class="disclaimer">Andrew Li Complete Protocol &bull; Aug 2026 &bull; Not medical advice — discuss all changes with your doctor.</div>
+
+</body>
+</html>
