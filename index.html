@@ -209,6 +209,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .gate-msg.ok{color:#3fb950}
 .signout{position:fixed;top:10px;right:12px;z-index:110;background:#161b22;border:1px solid #30363d;color:#8b949e;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:inherit}
 .signout.hidden{display:none}
+
+/* ── SYNC STATUS ── */
+.syncstat{position:fixed;top:10px;left:12px;z-index:110;font-size:11px;padding:4px 10px;border-radius:6px;max-width:calc(100% - 110px);border:1px solid transparent}
+.syncstat.hidden{display:none}
+.syncstat.ok{background:#0d2818;color:#3fb950;border-color:#238636}
+.syncstat.busy{background:#1a2332;color:#58a6ff;border-color:#1f6feb}
+.syncstat.err{background:#3d1214;color:#f85149;border-color:#da3633;cursor:pointer}
+.syncstat.err.expanded{max-width:calc(100% - 24px);white-space:normal;word-break:break-word}
 </style>
 </head>
 <body>
@@ -227,6 +235,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <button class="signout hidden" id="signout" onclick="signOut()">Sign out</button>
+<div class="syncstat hidden" id="syncstat" onclick="this.classList.toggle('expanded')"></div>
 
 <div class="app">
 
@@ -1192,22 +1201,44 @@ const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 // and never touches the network.
 let userId = null;
 
+// Sync status badge. Silent failures were impossible to diagnose on a phone,
+// so every cloud error now surfaces on screen. Tap the badge to expand it.
+function setSync(state, msg) {
+  const el = document.getElementById('syncstat');
+  if (!el) return;
+  if (!state) { el.className = 'syncstat hidden'; return; }
+  el.className = 'syncstat ' + state;
+  el.textContent = msg;
+  if (state === 'ok') setTimeout(() => {
+    if (el.classList.contains('ok')) el.className = 'syncstat hidden';
+  }, 2000);
+}
+function syncErr(where, e) {
+  const msg = (e && (e.message || e.msg)) || String(e);
+  const code = e && e.code ? ' [' + e.code + ']' : '';
+  console.warn(where, e);
+  setSync('err', 'Sync failed' + code + ': ' + msg);
+}
+
 async function cloudSave(key, value) {
   if (!userId) return;
   try {
+    setSync('busy', 'Saving…');
     const { error } = await sb.from('protocol_kv')
       .upsert({ user_id: userId, key, value, updated_at: new Date().toISOString() },
               { onConflict: 'user_id,key' });
-    if (error) console.warn('Cloud save failed:', error.message);
-  } catch(e) { console.warn('Cloud save failed:', e); }
+    if (error) { syncErr('Cloud save failed:', error); return; }
+    setSync('ok', 'Synced');
+  } catch(e) { syncErr('Cloud save failed:', e); }
 }
 async function cloudLoad(key) {
   if (!userId) return null;
   try {
-    const { data } = await sb.from('protocol_kv')
+    const { data, error } = await sb.from('protocol_kv')
       .select('value').eq('user_id', userId).eq('key', key).maybeSingle();
+    if (error) { syncErr('Cloud load failed:', error); return null; }
     return data ? data.value : null;
-  } catch(e) { return null; }
+  } catch(e) { syncErr('Cloud load failed:', e); return null; }
 }
 
 let currentDay = 'training';
