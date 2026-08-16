@@ -23,6 +23,17 @@ New versions are authored in iCloud at
 - the `cloudSync()` calls in `switchToDate` and `checkDayRollover`
 - `data-exrole="core"` on the five core workouts, and the show-up weighting in
   `getExCompletion` (see below)
+- `toLocalDate()` and its call sites (see Dates below)
+
+## Dates
+
+Andrew is in America/Chicago. Every `YYYY-MM-DD` key must come from
+`toLocalDate()`, never `new Date().toISOString().slice(0,10)` — `toISOString()`
+is UTC, which rolled the day over at 7 PM Central and wiped the day's
+checkboxes five hours early. iCloud versions are authored with the UTC form, so
+re-apply `toLocalDate()` at every date derivation on each merge: `today`,
+`getToday()`, `navDate()`, `renderStreak()`, and the trend loop. The only
+correct use of `toISOString()` is the `updated_at` timestamp sent to Supabase.
 
 Never straight-copy. Diff the new version against the deployed `index.html`,
 port Andrew's actual changes forward, and keep everything above intact. Then

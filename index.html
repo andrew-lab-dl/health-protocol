@@ -1250,14 +1250,22 @@ async function cloudLoad(key) {
   } catch(e) { syncErr('Cloud load failed:', e); return null; }
 }
 
+// Local calendar date as YYYY-MM-DD. Deliberately NOT toISOString(), which is
+// always UTC — that rolled the day over at 7 PM Central instead of midnight.
+function toLocalDate(d) {
+  return d.getFullYear() + '-' +
+         String(d.getMonth() + 1).padStart(2, '0') + '-' +
+         String(d.getDate()).padStart(2, '0');
+}
+
 let currentDay = 'training';
-let today = new Date().toISOString().slice(0,10);
+let today = toLocalDate(new Date());
 let SK = 'protocol-' + today;
 const SK_PLAN = 'protocol-plan';
 const SK_STREAK = 'protocol-streak';
 const PROTO_START = '2026-08-14';
 
-function getToday() { return new Date().toISOString().slice(0,10); }
+function getToday() { return toLocalDate(new Date()); }
 
 function getProtoWeek() {
   const start = new Date(PROTO_START + 'T00:00:00');
@@ -1335,7 +1343,7 @@ function switchToDate(dateStr) {
 function navDate(delta) {
   const d = new Date(viewingDate + 'T12:00:00');
   d.setDate(d.getDate() + delta);
-  const newDate = d.toISOString().slice(0, 10);
+  const newDate = toLocalDate(d);
   // Don't go into the future
   if (newDate > getToday()) return;
   switchToDate(newDate);
@@ -1579,7 +1587,7 @@ function renderStreak() {
   for (let i = 0; i < 7; i++) {
     const d = new Date(todayDate);
     d.setDate(d.getDate() - dow + i);
-    const key = d.toISOString().slice(0,10);
+    const key = toLocalDate(d);
     const dot = document.createElement('div');
     dot.className = 'streak-dot' + (streak[key] ? ' done' : '') + (key === today ? ' today' : '');
     dot.textContent = days[i];
@@ -1744,7 +1752,7 @@ function updateAverages() {
     for (let i = 0; i < r.days; i++) {
       const d = new Date(today + 'T12:00:00');
       d.setDate(d.getDate() - i);
-      const key = d.toISOString().slice(0,10);
+      const key = toLocalDate(d);
       const s = getDaySummary(key);
       if (s) {
         sum += Math.round((s.suppPct + s.exPct) / 2);
